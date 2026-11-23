@@ -28,8 +28,8 @@ export const MountainHero: React.FC = () => {
   const primerNombre = usuario?.nombre ? usuario.nombre.trim().split(" ")[0] : "David";
 
   return (
-    // Espacio superior elegante (mt-2 sm:mt-4) para despegar la imagen del notch / borde del teléfono
-    <div className="relative w-full overflow-hidden rounded-3xl bg-[#091122] border border-blue-900/30 mt-2 sm:mt-4 mb-4 sm:mb-6 shadow-2xl">
+    // Tarjeta fija/sticky superior en móvil para que no se desplace al hacer scroll
+    <div className="sticky top-2 sm:static z-30 w-full overflow-hidden rounded-3xl bg-[#091122]/95 backdrop-blur-xl border border-blue-900/40 mt-1 sm:mt-4 mb-4 sm:mb-6 shadow-2xl">
       {/* Fondo de cordillera de montañas con resplandor y flecha ascendente */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
         {/* Glow azul celestial */}

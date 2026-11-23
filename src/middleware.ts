@@ -9,7 +9,14 @@ const SECRET = new TextEncoder().encode(
 const COOKIE_NAME = "mlf_auth_session";
 
 // Rutas públicas que no requieren autenticación
-const PUBLIC_PATHS = ["/login", "/api/auth/login", "/manifest.webmanifest", "/icon.svg"];
+const PUBLIC_PATHS = [
+  "/login",
+  "/api/auth/login",
+  "/api/auth/register",
+  "/api/auth/recuperar",
+  "/manifest.webmanifest",
+  "/icon.svg",
+];
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;

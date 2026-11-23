@@ -98,21 +98,38 @@ export const CentralDonutChart: React.FC<CentralDonutChartProps> = ({
 
           {/* TEXTO EN EL CENTRO DEL DONUT */}
           <div className="absolute inset-0 flex flex-col items-center justify-center text-center pointer-events-none px-3">
-            <span className="text-[10px] sm:text-xs text-slate-400 font-medium tracking-wide">
-              Saldo Pendiente
-            </span>
+            {deudaTotalInicial === 0 ? (
+              <>
+                <span className="text-2xl sm:text-3xl mb-1">🎉</span>
+                <span className="text-sm sm:text-base font-black text-emerald-400 tracking-tight">
+                  ¡Al día!
+                </span>
+                <span className="text-[11px] sm:text-xs text-slate-300 font-bold mt-0.5">
+                  Sin deudas registradas
+                </span>
+                <span className="text-[10px] text-slate-400 mt-0.5">
+                  Libertad 100%
+                </span>
+              </>
+            ) : (
+              <>
+                <span className="text-[10px] sm:text-xs text-slate-400 font-medium tracking-wide">
+                  Saldo Pendiente
+                </span>
 
-            <span className="text-base sm:text-xl md:text-2xl font-black text-white tracking-tight my-0.5 truncate max-w-full">
-              {formatCOP(saldoPendiente)}
-            </span>
+                <span className="text-base sm:text-xl md:text-2xl font-black text-white tracking-tight my-0.5 truncate max-w-full">
+                  {formatCOP(saldoPendiente)}
+                </span>
 
-            <span className="text-sm sm:text-base md:text-lg font-black text-[#FF5A26] tracking-tight">
-              {formatPercentage(porcentajePendiente, 1)}
-            </span>
+                <span className="text-sm sm:text-base md:text-lg font-black text-[#FF5A26] tracking-tight">
+                  {formatPercentage(porcentajePendiente, 1)}
+                </span>
 
-            <span className="text-[10px] sm:text-[11px] text-slate-400 font-medium">
-              por pagar
-            </span>
+                <span className="text-[10px] sm:text-[11px] text-slate-400 font-medium">
+                  por pagar
+                </span>
+              </>
+            )}
           </div>
         </div>
 
