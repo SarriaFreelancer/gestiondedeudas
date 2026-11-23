@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { RotateCw } from "lucide-react";
 import { useFinancial } from "@/context/FinancialContext";
+import { BrandLogo } from "../ui/BrandLogo";
 
 export const MountainHero: React.FC = () => {
   const { refreshData, loading } = useFinancial();
@@ -23,7 +24,7 @@ export const MountainHero: React.FC = () => {
   }, []);
 
   return (
-    <div className="relative w-full overflow-hidden rounded-3xl bg-[#091122] border border-blue-900/30 mb-6 shadow-2xl">
+    <div className="relative w-full overflow-hidden rounded-3xl bg-[#091122] border border-blue-900/30 mb-4 sm:mb-6 shadow-2xl">
       {/* Fondo de cordillera de montañas con resplandor y flecha ascendente */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
         {/* Glow azul celestial */}
@@ -79,33 +80,41 @@ export const MountainHero: React.FC = () => {
       </div>
 
       {/* Contenido en primer plano */}
-      <div className="relative z-10 p-5 sm:p-7 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-2">
-            <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
-              ¡Hola!
-            </h1>
-            <span className="text-2xl sm:text-3xl animate-bounce">💪</span>
-          </div>
-          <p className="text-xs sm:text-sm text-slate-300 font-medium mt-1">
-            Vamos por tu libertad financiera
-          </p>
+      <div className="relative z-10 p-4 sm:p-7 flex flex-col justify-between">
+        {/* FILA SUPERIOR: Logo Oficial (idéntico a la imagen) */}
+        <div className="flex items-center justify-between pb-3 mb-3 border-b border-blue-900/30">
+          <BrandLogo />
         </div>
 
-        {/* Pastilla "Actualizado hoy" idéntica a la foto */}
-        <button
-          onClick={() => refreshData()}
-          disabled={loading}
-          className="self-start sm:self-center flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-[#0B1E19]/80 border border-emerald-500/30 hover:border-emerald-500/60 shadow-lg shadow-emerald-950/40 backdrop-blur-md transition-all group"
-        >
-          <div className="p-1 rounded-full bg-emerald-500/20 text-emerald-400 group-hover:rotate-180 transition-transform duration-500">
-            <RotateCw className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`} />
+        {/* FILA INFERIOR: Saludo y Pastilla "Actualizado hoy" */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
+          <div>
+            <div className="flex items-center gap-2">
+              <h1 className="text-xl sm:text-3xl font-black text-white tracking-tight">
+                ¡Hola!
+              </h1>
+              <span className="text-xl sm:text-3xl animate-bounce">💪</span>
+            </div>
+            <p className="text-xs sm:text-sm text-slate-300 font-medium mt-0.5">
+              Vamos por tu libertad financiera
+            </p>
           </div>
-          <div className="flex flex-col text-left leading-none">
-            <span className="text-[10px] text-emerald-300 font-medium">Actualizado hoy</span>
-            <span className="text-[11px] text-emerald-400 font-bold mt-0.5">{timeStr}</span>
-          </div>
-        </button>
+
+          {/* Pastilla "Actualizado hoy" idéntica a la foto */}
+          <button
+            onClick={() => refreshData()}
+            disabled={loading}
+            className="self-start sm:self-center flex items-center gap-2.5 px-3 py-1.5 rounded-full bg-[#0B1E19]/80 border border-emerald-500/30 hover:border-emerald-500/60 shadow-lg shadow-emerald-950/40 backdrop-blur-md transition-all group"
+          >
+            <div className="p-1 rounded-full bg-emerald-500/20 text-emerald-400 group-hover:rotate-180 transition-transform duration-500">
+              <RotateCw className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`} />
+            </div>
+            <div className="flex flex-col text-left leading-none">
+              <span className="text-[10px] text-emerald-300 font-medium">Actualizado hoy</span>
+              <span className="text-[11px] text-emerald-400 font-bold mt-0.5">{timeStr}</span>
+            </div>
+          </button>
+        </div>
       </div>
     </div>
   );

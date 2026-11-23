@@ -50,19 +50,19 @@ export const BudgetPeriodSelector: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col md:flex-row items-center justify-between gap-3 p-4 rounded-3xl bg-[#091122] border border-blue-900/30 shadow-xl">
+    <div className="flex flex-col sm:flex-row items-center justify-between gap-3 p-3.5 sm:p-4 rounded-3xl bg-[#091122] border border-blue-900/30 shadow-xl">
       {/* Selector de Mes / Año */}
-      <div className="flex items-center gap-2">
+      <div className="flex items-center justify-between w-full sm:w-auto gap-2">
         <button
           onClick={handlePrevMonth}
-          className="p-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 hover:text-white transition-colors"
+          className="p-1.5 sm:p-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 hover:text-white transition-colors"
           title="Mes anterior"
         >
           <ChevronLeft className="w-4 h-4" />
         </button>
 
-        <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-slate-900 border border-slate-800 text-xs font-bold text-white">
-          <Calendar className="w-4 h-4 text-blue-400" />
+        <div className="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-800 text-xs font-bold text-white">
+          <Calendar className="w-3.5 h-3.5 text-blue-400" />
           <span>
             {MESES[mes - 1]} {anio}
           </span>
@@ -70,7 +70,7 @@ export const BudgetPeriodSelector: React.FC = () => {
 
         <button
           onClick={handleNextMonth}
-          className="p-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 hover:text-white transition-colors"
+          className="p-1.5 sm:p-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 hover:text-white transition-colors"
           title="Mes siguiente"
         >
           <ChevronRight className="w-4 h-4" />
@@ -78,57 +78,57 @@ export const BudgetPeriodSelector: React.FC = () => {
       </div>
 
       {/* Selector Quincenal / Mensual */}
-      <div className="flex items-center gap-1.5 bg-slate-900/80 p-1 rounded-2xl border border-slate-800 text-xs">
+      <div className="w-full sm:w-auto flex items-center justify-center gap-1 bg-slate-900/80 p-1 rounded-2xl border border-slate-800 text-[11px] sm:text-xs">
         <button
           onClick={() => setPeriodoFiltro("MES_COMPLETO")}
-          className={`px-3 py-1.5 rounded-xl font-bold transition-all ${
+          className={`flex-1 sm:flex-initial px-2.5 py-1.5 rounded-xl font-bold transition-all text-center ${
             periodoFiltro === "MES_COMPLETO"
               ? "bg-blue-600 text-white shadow-md shadow-blue-600/30"
               : "text-slate-400 hover:text-white"
           }`}
         >
-          Mes Completo
+          Mes
         </button>
 
         <button
           onClick={() => setPeriodoFiltro("QUINCENA_1")}
-          className={`px-3 py-1.5 rounded-xl font-bold transition-all ${
+          className={`flex-1 sm:flex-initial px-2.5 py-1.5 rounded-xl font-bold transition-all text-center ${
             periodoFiltro === "QUINCENA_1"
               ? "bg-emerald-600 text-white shadow-md shadow-emerald-600/30"
               : "text-slate-400 hover:text-white"
           }`}
         >
-          1ª Quincena (1-15)
+          1ª Quincena
         </button>
 
         <button
           onClick={() => setPeriodoFiltro("QUINCENA_2")}
-          className={`px-3 py-1.5 rounded-xl font-bold transition-all ${
+          className={`flex-1 sm:flex-initial px-2.5 py-1.5 rounded-xl font-bold transition-all text-center ${
             periodoFiltro === "QUINCENA_2"
               ? "bg-purple-600 text-white shadow-md shadow-purple-600/30"
               : "text-slate-400 hover:text-white"
           }`}
         >
-          2ª Quincena (16-fin)
+          2ª Quincena
         </button>
       </div>
 
       {/* Botones de Acción Rápida */}
-      <div className="flex items-center gap-2">
+      <div className="w-full sm:w-auto flex items-center justify-center gap-2">
         <button
           onClick={() => setIsAddIncomeModalOpen(true)}
-          className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/30 text-xs font-bold transition-colors"
+          className="flex-1 sm:flex-initial flex items-center justify-center gap-1 px-3 py-1.5 rounded-xl bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/30 text-xs font-bold transition-colors"
         >
           <Plus className="w-3.5 h-3.5" />
-          <span>Ingresar Salario</span>
+          <span>+ Salario</span>
         </button>
 
         <button
           onClick={() => setIsAddExpenseModalOpen(true)}
-          className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-blue-600/20 hover:bg-blue-600/30 text-blue-300 border border-blue-500/30 text-xs font-bold transition-colors"
+          className="flex-1 sm:flex-initial flex items-center justify-center gap-1 px-3 py-1.5 rounded-xl bg-blue-600/20 hover:bg-blue-600/30 text-blue-300 border border-blue-500/30 text-xs font-bold transition-colors"
         >
           <Plus className="w-3.5 h-3.5" />
-          <span>Nuevo Gasto</span>
+          <span>+ Gasto</span>
         </button>
       </div>
     </div>

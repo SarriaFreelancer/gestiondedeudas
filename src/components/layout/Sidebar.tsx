@@ -14,6 +14,7 @@ import {
   ShieldCheck,
   User,
   Coins,
+  X,
 } from "lucide-react";
 import { BrandLogo } from "../ui/BrandLogo";
 
@@ -43,12 +44,18 @@ export const Sidebar: React.FC<{ isOpenMobile: boolean; onCloseMobile: () => voi
     }
   };
 
-  return (
+  const navContent = (
     <div className="flex flex-col h-full justify-between p-5">
       <div>
-        {/* LOGO DE MONTAÑA OFICIAL */}
-        <div className="px-1 py-3 mb-6 border-b border-slate-800">
+        {/* LOGO DE MONTAÑA OFICIAL Y BOTÓN CERRAR EN MÓVIL */}
+        <div className="flex items-center justify-between px-1 py-3 mb-6 border-b border-slate-800">
           <BrandLogo />
+          <button
+            onClick={onCloseMobile}
+            className="lg:hidden p-1.5 rounded-xl bg-slate-800 text-slate-400 hover:text-white"
+          >
+            <X className="w-5 h-5" />
+          </button>
         </div>
 
         {/* NAVEGACIÓN */}
@@ -101,5 +108,27 @@ export const Sidebar: React.FC<{ isOpenMobile: boolean; onCloseMobile: () => voi
         </button>
       </div>
     </div>
+  );
+
+  return (
+    <>
+      {/* Sidebar Desktop fijo a la izquierda (oculto en móvil) */}
+      <aside className="hidden lg:flex flex-col w-64 bg-[#091122] border-r border-slate-800 fixed inset-y-0 left-0 z-40">
+        {navContent}
+      </aside>
+
+      {/* Drawer Móvil (solo se abre si el usuario presiona el menú en móvil) */}
+      {isOpenMobile && (
+        <div className="lg:hidden fixed inset-0 z-50 flex animate-in fade-in duration-200">
+          <div
+            className="fixed inset-0 bg-black/75 backdrop-blur-sm"
+            onClick={onCloseMobile}
+          />
+          <div className="relative flex flex-col w-72 max-w-[85%] bg-[#091122] border-r border-slate-800 z-50 animate-in slide-in-from-left duration-200 shadow-2xl">
+            {navContent}
+          </div>
+        </div>
+      )}
+    </>
   );
 };
