@@ -118,30 +118,30 @@ export const DebtMonthSelector: React.FC = () => {
 
       {/* CINTA DE TRAZABILIDAD MENSUAL (INICIO, ABONADO, CIERRE) */}
       <div className="grid grid-cols-3 gap-2 pt-1 border-t border-slate-800/80 text-center">
-        <div className="p-2 rounded-2xl bg-slate-900/60 border border-slate-800/80">
-          <span className="text-[10px] text-slate-400 block font-medium">
+        <div className="p-2 rounded-2xl bg-slate-900/60 border border-slate-800/80 overflow-hidden">
+          <span className="text-[10px] text-slate-400 block font-medium truncate">
             Debías al Iniciar
           </span>
-          <span className="text-xs sm:text-sm font-bold text-slate-200">
+          <span className="text-[11px] sm:text-xs md:text-sm font-bold text-slate-200 truncate block" title={formatCOP(saldoInicioMes)}>
             {formatCOP(saldoInicioMes)}
           </span>
         </div>
 
-        <div className="p-2 rounded-2xl bg-emerald-950/30 border border-emerald-500/30">
-          <span className="text-[10px] text-emerald-300 block font-bold flex items-center justify-center gap-1">
-            <TrendingDown className="w-3 h-3" />
-            Abonaste en {MESES[mesSeleccionado - 1].slice(0, 3)}
+        <div className="p-2 rounded-2xl bg-emerald-950/30 border border-emerald-500/30 overflow-hidden">
+          <span className="text-[10px] text-emerald-300 block font-bold flex items-center justify-center gap-1 truncate">
+            <TrendingDown className="w-3 h-3 flex-shrink-0" />
+            <span className="truncate">Abonaste</span>
           </span>
-          <span className="text-xs sm:text-sm font-black text-emerald-400">
+          <span className="text-[11px] sm:text-xs md:text-sm font-black text-emerald-400 truncate block" title={totalAbonadoEnMes > 0 ? `-${formatCOP(totalAbonadoEnMes)}` : "$0"}>
             {totalAbonadoEnMes > 0 ? `-${formatCOP(totalAbonadoEnMes)}` : "$0"}
           </span>
         </div>
 
-        <div className="p-2 rounded-2xl bg-slate-900/60 border border-slate-800/80">
-          <span className="text-[10px] text-slate-400 block font-medium">
-            {esMesActual ? "Debes Actualmente" : "Cerraste Debiendo"}
+        <div className="p-2 rounded-2xl bg-slate-900/60 border border-slate-800/80 overflow-hidden">
+          <span className="text-[10px] text-slate-400 block font-medium truncate">
+            {esMesActual ? "Debes Hoy" : "Cerraste"}
           </span>
-          <span className="text-xs sm:text-sm font-bold text-[#38BDF8]">
+          <span className="text-[11px] sm:text-xs md:text-sm font-bold text-[#38BDF8] truncate block" title={formatCOP(saldoCierreMes)}>
             {formatCOP(saldoCierreMes)}
           </span>
         </div>

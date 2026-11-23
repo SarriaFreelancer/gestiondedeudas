@@ -46,14 +46,17 @@ export const SavingsGoalsSection: React.FC = () => {
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center flex-wrap gap-2">
           {saldoDisponible > 0 && metasAhorro.length > 0 && (
             <button
               onClick={() => setIsTransferModalOpen(true)}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-bold transition-all shadow-lg shadow-emerald-600/20"
             >
               <Sparkles className="w-3.5 h-3.5 text-emerald-200" />
-              <span>Trasladar Sobrante ({formatCOP(saldoDisponible)})</span>
+              <span>
+                <span className="hidden sm:inline">Trasladar Sobrante</span>
+                <span className="sm:hidden">Aportar</span> ({formatCOP(saldoDisponible)})
+              </span>
             </button>
           )}
 

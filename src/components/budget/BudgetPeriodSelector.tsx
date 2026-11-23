@@ -154,44 +154,44 @@ export const BudgetPeriodSelector: React.FC = () => {
           Modalidad de tus ingresos:
         </span>
 
-        <div className="flex items-center gap-1 bg-slate-900/60 p-1 rounded-xl border border-slate-800/80 text-[10px]">
+        <div className="grid grid-cols-3 sm:flex items-center gap-1 bg-slate-900/60 p-1 rounded-xl border border-slate-800/80 text-[10px]">
           <button
             type="button"
             onClick={() => setModalidadSalario("QUINCENAL")}
-            className={`flex-1 sm:flex-initial px-2.5 py-1 rounded-lg font-bold transition-all flex items-center gap-1 ${
+            className={`px-2 py-1 rounded-lg font-bold transition-all flex items-center justify-center gap-1 ${
               modalidadSalario === "QUINCENAL"
                 ? "bg-emerald-600 text-white shadow-sm"
                 : "text-slate-400 hover:text-white"
             }`}
           >
-            <Clock className="w-3 h-3" />
-            <span>Quincenal</span>
+            <Clock className="w-3 h-3 flex-shrink-0" />
+            <span className="truncate">Quincenal</span>
           </button>
 
           <button
             type="button"
             onClick={() => setModalidadSalario("MENSUAL")}
-            className={`flex-1 sm:flex-initial px-2.5 py-1 rounded-lg font-bold transition-all flex items-center gap-1 ${
+            className={`px-2 py-1 rounded-lg font-bold transition-all flex items-center justify-center gap-1 ${
               modalidadSalario === "MENSUAL"
                 ? "bg-blue-600 text-white shadow-sm"
                 : "text-slate-400 hover:text-white"
             }`}
           >
-            <Calendar className="w-3 h-3" />
-            <span>Mensual</span>
+            <Calendar className="w-3 h-3 flex-shrink-0" />
+            <span className="truncate">Mensual</span>
           </button>
 
           <button
             type="button"
             onClick={() => setModalidadSalario("INDEPENDIENTE")}
-            className={`flex-1 sm:flex-initial px-2.5 py-1 rounded-lg font-bold transition-all flex items-center gap-1 ${
+            className={`px-2 py-1 rounded-lg font-bold transition-all flex items-center justify-center gap-1 ${
               modalidadSalario === "INDEPENDIENTE"
                 ? "bg-purple-600 text-white shadow-sm"
                 : "text-slate-400 hover:text-white"
             }`}
           >
-            <Briefcase className="w-3 h-3" />
-            <span>Independiente / Diario</span>
+            <Briefcase className="w-3 h-3 flex-shrink-0" />
+            <span className="truncate">Diario / Indep.</span>
           </button>
         </div>
       </div>

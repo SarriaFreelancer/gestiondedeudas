@@ -68,7 +68,7 @@ export const CreditorDistributionChart: React.FC<CreditorDistributionProps> = ({
 
       <div className="flex flex-col md:flex-row items-center gap-6 justify-between">
         {/* Mini Donut multicolor idéntico a la foto */}
-        <div className="relative w-44 h-44 flex-shrink-0 flex items-center justify-center mx-auto md:mx-0">
+        <div className="relative w-36 h-36 sm:w-44 sm:h-44 flex-shrink-0 flex items-center justify-center mx-auto md:mx-0">
           {mounted && (
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
@@ -94,8 +94,8 @@ export const CreditorDistributionChart: React.FC<CreditorDistributionProps> = ({
                   nameKey="nombreVisual"
                   cx="50%"
                   cy="50%"
-                  innerRadius={48}
-                  outerRadius={74}
+                  innerRadius="55%"
+                  outerRadius="85%"
                   paddingAngle={2}
                 >
                   {dataActiva.map((entry) => (
@@ -112,20 +112,20 @@ export const CreditorDistributionChart: React.FC<CreditorDistributionProps> = ({
           {dataAlineada.map((item) => (
             <div
               key={item.id}
-              className="flex items-center justify-between text-xs py-1 hover:bg-slate-800/30 px-2 rounded-lg transition-colors"
+              className="flex items-center justify-between text-xs py-1 hover:bg-slate-800/30 px-2 rounded-lg transition-colors gap-2"
             >
               {/* Punto y Nombre */}
-              <div className="flex items-center gap-2.5 min-w-[130px]">
+              <div className="flex items-center gap-2 min-w-0 flex-1">
                 <span
                   className="w-2.5 h-2.5 rounded-full flex-shrink-0 shadow-sm"
                   style={{ backgroundColor: item.colorAlineado }}
                 />
-                <div>
-                  <span className="font-semibold text-white tracking-tight block">
+                <div className="min-w-0 truncate">
+                  <span className="font-semibold text-white tracking-tight truncate block">
                     {item.nombreVisual}
                   </span>
                   {item.abonadoEnMes !== undefined && item.abonadoEnMes > 0 && (
-                    <span className="text-[10px] text-emerald-400 font-bold">
+                    <span className="text-[10px] text-emerald-400 font-bold block truncate">
                       Abonado: -{formatCOP(item.abonadoEnMes)}
                     </span>
                   )}
@@ -133,12 +133,12 @@ export const CreditorDistributionChart: React.FC<CreditorDistributionProps> = ({
               </div>
 
               {/* Porcentaje */}
-              <span className="font-bold text-slate-300 w-12 text-right">
+              <span className="font-bold text-slate-300 text-[11px] sm:text-xs text-right flex-shrink-0">
                 {formatPercentage(item.porcentajeSobreTotal, 1)}
               </span>
 
               {/* Saldo en pesos */}
-              <span className="font-mono font-bold text-white text-right w-24">
+              <span className="font-mono font-bold text-white text-[11px] sm:text-xs text-right flex-shrink-0">
                 {formatCOP(item.saldoPendiente)}
               </span>
             </div>
