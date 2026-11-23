@@ -41,8 +41,9 @@ export async function POST(req: Request) {
     }
 
     const now = new Date();
-    const targetMes = mes ? parseInt(mes) : now.getMonth() + 1;
-    const targetAnio = anio ? parseInt(anio) : now.getFullYear();
+    const fechaObj = body.fecha ? new Date(body.fecha) : now;
+    const targetMes = mes ? parseInt(mes) : fechaObj.getMonth() + 1;
+    const targetAnio = anio ? parseInt(anio) : fechaObj.getFullYear();
     const targetPeriodo = (periodo as PeriodoPresupuesto) || PeriodoPresupuesto.QUINCENA_1;
     const nuevoMonto = Number(monto);
 
@@ -53,13 +54,15 @@ export async function POST(req: Request) {
         periodo: targetPeriodo,
         mes: targetMes,
         anio: targetAnio,
-        fuente: fuente?.trim() || "SALARIO",
+        fecha: fechaObj,
+        fuente: fuente?.trim() || (targetPeriodo === PeriodoPresupuesto.DIARIO_VARIABLE ? "HONORARIOS" : "SALARIO"),
       },
     });
 
     // Si se agrega una quincena y sincronizarQuincena es true, asegurar la contraparte
     if (
       sincronizarQuincena &&
+      targetPeriodo !== PeriodoPresupuesto.DIARIO_VARIABLE &&
       (targetPeriodo === PeriodoPresupuesto.QUINCENA_1 ||
         targetPeriodo === PeriodoPresupuesto.QUINCENA_2)
     ) {

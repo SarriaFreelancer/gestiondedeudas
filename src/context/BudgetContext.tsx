@@ -7,14 +7,19 @@ interface BudgetContextType {
   summary: BudgetSummary | null;
   gastos: any[];
   ingresos: any[];
+  metasAhorro: any[];
+  totalAhorradoMetas: number;
   loading: boolean;
   mes: number;
   anio: number;
   periodoFiltro: string; // 'MES_COMPLETO', 'QUINCENA_1', 'QUINCENA_2'
+  modalidadSalario: "QUINCENAL" | "MENSUAL" | "INDEPENDIENTE";
   setMes: (m: number) => void;
   setAnio: (a: number) => void;
   setPeriodoFiltro: (p: string) => void;
+  setModalidadSalario: (mod: "QUINCENAL" | "MENSUAL" | "INDEPENDIENTE") => void;
   refreshBudgetData: () => Promise<void>;
+  refreshMetas: () => Promise<void>;
   isAddExpenseModalOpen: boolean;
   setIsAddExpenseModalOpen: (open: boolean) => void;
   isAddIncomeModalOpen: boolean;
@@ -27,6 +32,10 @@ interface BudgetContextType {
   setIsPayExpenseModalOpen: (open: boolean) => void;
   selectedExpenseForPayment: any | null;
   setSelectedExpenseForPayment: (gasto: any | null) => void;
+  isTransferModalOpen: boolean;
+  setIsTransferModalOpen: (open: boolean) => void;
+  isCreateGoalModalOpen: boolean;
+  setIsCreateGoalModalOpen: (open: boolean) => void;
 }
 
 const BudgetContext = createContext<BudgetContextType | undefined>(undefined);
@@ -36,10 +45,15 @@ export const BudgetProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const [mes, setMes] = useState<number>(now.getMonth() + 1);
   const [anio, setAnio] = useState<number>(now.getFullYear());
   const [periodoFiltro, setPeriodoFiltro] = useState<string>("MES_COMPLETO");
+  const [modalidadSalario, setModalidadSalario] = useState<
+    "QUINCENAL" | "MENSUAL" | "INDEPENDIENTE"
+  >("QUINCENAL");
 
   const [summary, setSummary] = useState<BudgetSummary | null>(null);
   const [gastos, setGastos] = useState<any[]>([]);
   const [ingresos, setIngresos] = useState<any[]>([]);
+  const [metasAhorro, setMetasAhorro] = useState<any[]>([]);
+  const [totalAhorradoMetas, setTotalAhorradoMetas] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(true);
 
   // Modales
@@ -49,6 +63,21 @@ export const BudgetProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const [selectedIncomeForEdit, setSelectedIncomeForEdit] = useState<any | null>(null);
   const [isPayExpenseModalOpen, setIsPayExpenseModalOpen] = useState(false);
   const [selectedExpenseForPayment, setSelectedExpenseForPayment] = useState<any | null>(null);
+  const [isTransferModalOpen, setIsTransferModalOpen] = useState(false);
+  const [isCreateGoalModalOpen, setIsCreateGoalModalOpen] = useState(false);
+
+  const refreshMetas = useCallback(async () => {
+    try {
+      const res = await fetch("/api/metas", { cache: "no-store" });
+      if (res.ok) {
+        const data = await res.json();
+        setMetasAhorro(data.metas || []);
+        setTotalAhorradoMetas(data.totalAhorrado || 0);
+      }
+    } catch (e) {
+      console.error("Error al cargar metas de ahorro:", e);
+    }
+  }, []);
 
   const refreshBudgetData = useCallback(async () => {
     try {
@@ -81,7 +110,8 @@ export const BudgetProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
   useEffect(() => {
     refreshBudgetData();
-  }, [refreshBudgetData]);
+    refreshMetas();
+  }, [refreshBudgetData, refreshMetas]);
 
   return (
     <BudgetContext.Provider
@@ -89,14 +119,19 @@ export const BudgetProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         summary,
         gastos,
         ingresos,
+        metasAhorro,
+        totalAhorradoMetas,
         loading,
         mes,
         anio,
         periodoFiltro,
+        modalidadSalario,
         setMes,
         setAnio,
         setPeriodoFiltro,
+        setModalidadSalario,
         refreshBudgetData,
+        refreshMetas,
         isAddExpenseModalOpen,
         setIsAddExpenseModalOpen,
         isAddIncomeModalOpen,
@@ -109,6 +144,10 @@ export const BudgetProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         setIsPayExpenseModalOpen,
         selectedExpenseForPayment,
         setSelectedExpenseForPayment,
+        isTransferModalOpen,
+        setIsTransferModalOpen,
+        isCreateGoalModalOpen,
+        setIsCreateGoalModalOpen,
       }}
     >
       {children}

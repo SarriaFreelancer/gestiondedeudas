@@ -38,6 +38,7 @@ enum PeriodoPresupuesto {
   QUINCENA_1
   QUINCENA_2
   MES_COMPLETO
+  DIARIO_VARIABLE
 }
 
 enum TipoGasto {
@@ -152,6 +153,7 @@ model Configuracion {
   moneda                String   @default("COP")
   formatoFecha          String   @default("DD/MM/YYYY")
   estrategiaPago        String   @default("BOLA_DE_NIEVE")
+  modalidadSalario      String   @default("QUINCENAL") // QUINCENAL, MENSUAL, INDEPENDIENTE
   preferenciasDashboard String?  @db.Text
   createdAt             DateTime @default(now())
   updatedAt             DateTime @updatedAt
@@ -200,4 +202,46 @@ model GastoPresupuesto {
   @@index([categoria])
   @@index([tipo])
   @@index([estaPagado])
+}
+
+// ==========================================
+// MÓDULO 3: METAS DE AHORRO & RESERVA BANCARIA
+// (Seguimiento de saldo sobrante trasladado a cuentas/bolsillos bancarios)
+// ==========================================
+
+model MetaAhorro {
+  id             String       @id @default(cuid())
+  nombre         String       // Ej: Fondo de Emergencia, Cajita Nu 13%, Vacaciones
+  montoObjetivo  Decimal      @db.Decimal(15, 2)
+  montoActual    Decimal      @default(0) @db.Decimal(15, 2)
+  bancoUbicacion String       @default("NEQUI_BOLSILLO") // BANCOLOMBIA, NEQUI_BOLSILLO, NU_CAJITA, LULO_BANK, DAVIPLATA, OTRO_BANCO
+  color          String?      @default("#10B981")
+  icono          String?      @default("PiggyBank")
+  fechaLimite    DateTime?
+  estaCompletada Boolean      @default(false)
+  notas          String?      @db.Text
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  aportes        AporteMeta[]
+
+  @@index([estaCompletada])
+}
+
+model AporteMeta {
+  id             String      @id @default(cuid())
+  metaId         String
+  monto          Decimal     @db.Decimal(15, 2)
+  fecha          DateTime    @default(now())
+  origen         String?     @default("SOBRANTE_SALARIO") // SOBRANTE_SALARIO, APORTE_EXTRAORDINARIO, AJUSTE
+  mes            Int?        // Mes del salario del que provino
+  anio           Int?        // Año del salario del que provino
+  bancoDetalle   String?     // Cuenta o producto bancario de destino
+  notas          String?     @db.Text
+  createdAt      DateTime    @default(now())
+
+  meta           MetaAhorro  @relation(fields: [metaId], references: [id], onDelete: Cascade)
+
+  @@index([metaId])
+  @@index([fecha])
 }

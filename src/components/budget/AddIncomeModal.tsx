@@ -1,22 +1,50 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useBudget } from "@/context/BudgetContext";
-import { Wallet, X, AlertCircle, Loader2, ArrowRight } from "lucide-react";
+import { Wallet, X, AlertCircle, Loader2, ArrowRight, Calendar, Briefcase } from "lucide-react";
 import { formatCOP } from "@/lib/formatters";
 
 export const AddIncomeModal: React.FC = () => {
-  const { isAddIncomeModalOpen, setIsAddIncomeModalOpen, mes, anio, refreshBudgetData } =
+  const { isAddIncomeModalOpen, setIsAddIncomeModalOpen, mes, anio, refreshBudgetData, modalidadSalario } =
     useBudget();
 
+  const hoyStr = new Date().toISOString().slice(0, 10);
+
   const [descripcion, setDescripcion] = useState("Salario Quincenal");
-  const [monto, setMonto] = useState<number>(2500000);
+  const [monto, setMonto] = useState<number>(1500000);
   const [periodo, setPeriodo] = useState<string>("QUINCENA_1");
   const [fuente, setFuente] = useState<string>("SALARIO");
+  const [fecha, setFecha] = useState<string>(hoyStr);
   const [sincronizarQuincena, setSincronizarQuincena] = useState<boolean>(true);
   const [propagarFuturos, setPropagarFuturos] = useState<boolean>(true);
   const [submitting, setSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (modalidadSalario === "INDEPENDIENTE") {
+      setDescripcion("Ingreso Diario / Venta / Honorarios");
+      setPeriodo("DIARIO_VARIABLE");
+      setFuente("HONORARIOS");
+      setMonto(150000);
+      setSincronizarQuincena(false);
+      setPropagarFuturos(false);
+    } else if (modalidadSalario === "MENSUAL") {
+      setDescripcion("Salario Mensual");
+      setPeriodo("MES_COMPLETO");
+      setFuente("SALARIO");
+      setMonto(3000000);
+      setSincronizarQuincena(false);
+      setPropagarFuturos(true);
+    } else {
+      setDescripcion("Salario Quincenal");
+      setPeriodo("QUINCENA_1");
+      setFuente("SALARIO");
+      setMonto(1500000);
+      setSincronizarQuincena(true);
+      setPropagarFuturos(true);
+    }
+  }, [modalidadSalario, isAddIncomeModalOpen]);
 
   if (!isAddIncomeModalOpen) return null;
 
@@ -34,10 +62,11 @@ export const AddIncomeModal: React.FC = () => {
           monto: Number(monto),
           periodo,
           fuente,
+          fecha,
           mes,
           anio,
-          sincronizarQuincena,
-          propagarFuturos,
+          sincronizarQuincena: periodo === "DIARIO_VARIABLE" ? false : sincronizarQuincena,
+          propagarFuturos: periodo === "DIARIO_VARIABLE" ? false : propagarFuturos,
         }),
       });
 
@@ -57,7 +86,7 @@ export const AddIncomeModal: React.FC = () => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="relative w-full max-w-md p-6 rounded-3xl bg-[#151F32] border border-slate-700 shadow-2xl text-slate-100">
+      <div className="relative w-full max-w-md p-6 rounded-3xl bg-[#151F32] border border-slate-700 shadow-2xl text-slate-100 max-h-[90vh] overflow-y-auto">
         <button
           onClick={() => setIsAddIncomeModalOpen(false)}
           className="absolute top-5 right-5 p-2 rounded-xl bg-slate-800 text-slate-400 hover:text-white"
@@ -70,9 +99,15 @@ export const AddIncomeModal: React.FC = () => {
             <Wallet className="w-6 h-6" />
           </div>
           <div>
-            <h3 className="text-lg font-bold text-white">Ingresar Salario / Ingreso</h3>
+            <h3 className="text-lg font-bold text-white">
+              {modalidadSalario === "INDEPENDIENTE"
+                ? "Registrar Ingreso Diario / Variable"
+                : "Ingresar Salario / Ingreso"}
+            </h3>
             <p className="text-xs text-slate-400">
-              Registra el dinero que llegó en tu quincena o mes
+              {modalidadSalario === "INDEPENDIENTE"
+                ? "Agrega lo que ganaste hoy, por servicio o día a día"
+                : "Registra el dinero que llegó en tu quincena o mes"}
             </p>
           </div>
         </div>
@@ -94,7 +129,7 @@ export const AddIncomeModal: React.FC = () => {
               required
               value={descripcion}
               onChange={(e) => setDescripcion(e.target.value)}
-              placeholder="Ej. Salario 1ra Quincena, Bono, etc."
+              placeholder="Ej. Salario Quincenal, Venta del día, Honorarios..."
               className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs focus:outline-none focus:border-blue-500"
             />
           </div>
@@ -113,6 +148,19 @@ export const AddIncomeModal: React.FC = () => {
             />
           </div>
 
+          {/* Fecha si es independiente / diario */}
+          <div>
+            <label className="block text-xs font-semibold text-slate-300 mb-1">
+              Fecha en que recibiste el dinero
+            </label>
+            <input
+              type="date"
+              value={fecha}
+              onChange={(e) => setFecha(e.target.value)}
+              className="w-full px-3.5 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs focus:outline-none focus:border-blue-500"
+            />
+          </div>
+
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-semibold text-slate-300 mb-1">
@@ -123,6 +171,7 @@ export const AddIncomeModal: React.FC = () => {
                 onChange={(e) => setPeriodo(e.target.value)}
                 className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs focus:outline-none focus:border-blue-500"
               >
+                <option value="DIARIO_VARIABLE">Ingreso Diario / Variable</option>
                 <option value="QUINCENA_1">1ª Quincena (1-15)</option>
                 <option value="QUINCENA_2">2ª Quincena (16-fin)</option>
                 <option value="MES_COMPLETO">Mes Completo</option>
@@ -139,14 +188,17 @@ export const AddIncomeModal: React.FC = () => {
                 className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs focus:outline-none focus:border-blue-500"
               >
                 <option value="SALARIO">Salario Fijo</option>
-                <option value="HONORARIOS">Honorarios / Extra</option>
+                <option value="HONORARIOS">Honorarios / Profesional</option>
+                <option value="VENTAS">Venta / Comercio</option>
+                <option value="FREELANCE">Freelance / Turno</option>
+                <option value="COMISIONES">Comisiones</option>
                 <option value="PRIMA">Prima de Servicios</option>
                 <option value="OTROS">Otro Ingreso</option>
               </select>
             </div>
           </div>
 
-          {/* OPCIONES DE SINCRONIZACIÓN Y PERSISTENCIA */}
+          {/* OPCIONES DE SINCRONIZACIÓN Y PERSISTENCIA (SOLO SI ES QUINCENA) */}
           {(periodo === "QUINCENA_1" || periodo === "QUINCENA_2") && (
             <div className="p-3 rounded-2xl bg-slate-900/90 border border-slate-800 space-y-2">
               <label className="flex items-start gap-2.5 cursor-pointer">
@@ -205,7 +257,7 @@ export const AddIncomeModal: React.FC = () => {
                 </>
               ) : (
                 <>
-                  Registrar Salario
+                  Registrar Ingreso
                   <ArrowRight className="w-4 h-4" />
                 </>
               )}

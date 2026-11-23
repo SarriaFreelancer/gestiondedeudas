@@ -107,8 +107,16 @@ export async function getBudgetSummary(
       ingresosQuincena1 += val;
     } else if (ing.periodo === PeriodoPresupuesto.QUINCENA_2) {
       ingresosQuincena2 += val;
+    } else if (ing.periodo === PeriodoPresupuesto.DIARIO_VARIABLE) {
+      // Ingreso diario o independiente: asignado según el día calendario
+      const dia = new Date(ing.fecha).getDate();
+      if (dia <= 15) {
+        ingresosQuincena1 += val;
+      } else {
+        ingresosQuincena2 += val;
+      }
     } else {
-      // Mes completo repartido
+      // Mes completo repartido equitativamente
       ingresosQuincena1 += val / 2;
       ingresosQuincena2 += val / 2;
     }
