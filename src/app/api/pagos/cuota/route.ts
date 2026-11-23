@@ -10,7 +10,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: getZodErrorMessage(result.error) }, { status: 400 });
     }
 
-    const { deudaId, cuotaId, monto, metodoPago, referenciaPago, observaciones } = result.data;
+    const { deudaId, cuotaId, monto, metodoPago, referenciaPago, comprobanteUrl, observaciones } = result.data;
 
     const resultado = await registrarPagoCuota({
       deudaId,
@@ -18,6 +18,7 @@ export async function POST(req: Request) {
       monto,
       metodoPago,
       referenciaPago,
+      comprobanteUrl,
       observaciones,
     });
 

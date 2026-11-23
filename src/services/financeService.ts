@@ -151,6 +151,7 @@ export async function registrarPagoCuota(params: {
   monto?: number;
   metodoPago?: string;
   referenciaPago?: string;
+  comprobanteUrl?: string;
   observaciones?: string;
 }) {
   return await prisma.$transaction(async (tx) => {
@@ -183,6 +184,7 @@ export async function registrarPagoCuota(params: {
         fecha: new Date(),
         metodoPago: params.metodoPago || "TRANSFERENCIA",
         referenciaPago: params.referenciaPago,
+        comprobanteUrl: params.comprobanteUrl,
         observaciones:
           params.observaciones ||
           `Pago de cuota #${cuota.numeroCuota} por valor de $${montoPago.toLocaleString("es-CO")}`,
@@ -241,6 +243,7 @@ export async function registrarAbono(params: {
   destinoAbono?: DestinoAbono;
   metodoPago?: string;
   referenciaPago?: string;
+  comprobanteUrl?: string;
   observaciones?: string;
 }) {
   return await prisma.$transaction(async (tx) => {
@@ -281,6 +284,7 @@ export async function registrarAbono(params: {
         fecha: new Date(),
         metodoPago: params.metodoPago || "TRANSFERENCIA",
         referenciaPago: params.referenciaPago,
+        comprobanteUrl: params.comprobanteUrl,
         observaciones:
           params.observaciones ||
           (esPagoTotal

@@ -14,6 +14,9 @@ import {
   AlertTriangle,
   Loader2,
   X,
+  Camera,
+  Download,
+  Eye,
 } from "lucide-react";
 import * as XLSX from "xlsx";
 import jsPDF from "jspdf";
@@ -35,6 +38,15 @@ export default function HistorialPage() {
   const [motivoReversion, setMotivoReversion] = useState("");
   const [reverting, setReverting] = useState(false);
   const [errorReversion, setErrorReversion] = useState<string | null>(null);
+
+  // Modal de Comprobante / Recibo
+  const [comprobanteModalOpen, setComprobanteModalOpen] = useState(false);
+  const [comprobanteActivo, setComprobanteActivo] = useState<{
+    url: string;
+    entidad: string;
+    monto: number;
+    fecha: string;
+  } | null>(null);
 
   const fetchMovimientos = async () => {
     try {
@@ -106,17 +118,18 @@ export default function HistorialPage() {
     }
   };
 
-  // EXPORTAR A EXCEL
+  // Exportar a Excel
   const exportToExcel = () => {
     const dataToExport = movimientosFiltrados.map((m) => ({
-      Fecha: formatDate(m.fecha),
+      Fecha: formatDateFull(m.fecha),
       Acreedor: m.deuda?.entidad || "N/A",
-      Tipo: m.tipo,
-      Monto: Number(m.monto),
+      "Tipo Movimiento": m.tipo,
+      "Destino Abono": m.destinoAbono || "N/A",
+      "Monto (COP)": Number(m.monto),
       "Saldo Anterior": Number(m.saldoAnterior),
       "Saldo Posterior": Number(m.saldoPosterior),
-      "Método de Pago": m.metodoPago || "N/A",
-      Comprobante: m.referenciaPago || "N/A",
+      "Método de Pago": m.metodoPago,
+      "Referencia / Comprobante": m.referenciaPago || "",
       Observaciones: m.observaciones || "",
       Estado: m.estaRevertido ? "REVERTIDO" : "CONFIRMADO",
     }));
@@ -124,37 +137,40 @@ export default function HistorialPage() {
     const worksheet = XLSX.utils.json_to_sheet(dataToExport);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Historial_Movimientos");
-    XLSX.writeFile(workbook, "Historial_Financiero_MiLibertad.xlsx");
+
+    XLSX.writeFile(workbook, `Movimientos_Libertad_Financiera_${new Date().toISOString().slice(0, 10)}.xlsx`);
   };
 
-  // EXPORTAR A PDF
+  // Exportar a PDF
   const exportToPDF = () => {
     const doc = new jsPDF({ orientation: "landscape" });
+
     doc.setFontSize(16);
-    doc.text("MI LIBERTAD FINANCIERA — HISTORIAL DE MOVIMIENTOS", 14, 18);
+    doc.text("MI LIBERTAD FINANCIERA — HISTORIAL AUDITABLE DE MOVIMIENTOS", 14, 15);
     doc.setFontSize(10);
-    doc.text(`Generado: ${new Date().toLocaleDateString("es-CO")}`, 14, 25);
+    doc.text(`Generado: ${new Date().toLocaleString("es-CO")}`, 14, 22);
 
     const tableData = movimientosFiltrados.map((m) => [
       formatDate(m.fecha),
-      m.deuda?.entidad || "",
+      m.deuda?.entidad || "N/A",
       m.tipo.replace("_", " "),
       formatCOP(m.monto),
+      formatCOP(m.saldoAnterior),
       formatCOP(m.saldoPosterior),
-      m.metodoPago || "TRANSFERENCIA",
-      m.estaRevertido ? "REVERTIDO" : "CONFIRMADO",
+      m.metodoPago,
+      m.estaRevertido ? "REVERTIDO" : "OK",
     ]);
 
     autoTable(doc, {
-      startY: 30,
-      head: [["Fecha", "Acreedor", "Tipo", "Monto", "Saldo Posterior", "Método", "Estado"]],
+      head: [["Fecha", "Acreedor", "Tipo", "Monto", "Saldo Ant.", "Saldo Post.", "Método", "Estado"]],
       body: tableData,
+      startY: 28,
       theme: "striped",
-      headStyles: { fillColor: [21, 31, 50] },
       styles: { fontSize: 8 },
+      headStyles: { fillColor: [21, 31, 50] },
     });
 
-    doc.save("Historial_Financiero_MiLibertad.pdf");
+    doc.save(`Movimientos_Libertad_Financiera_${new Date().toISOString().slice(0, 10)}.pdf`);
   };
 
   return (
@@ -166,9 +182,9 @@ export default function HistorialPage() {
             <History className="w-6 h-6" />
           </div>
           <div>
-            <h1 className="text-xl sm:text-2xl font-black text-white">Historial Financiero & Auditoría</h1>
+            <h1 className="text-xl sm:text-2xl font-black text-white">Historial Financiero Auditable</h1>
             <p className="text-xs text-slate-400">
-              Registro inmutable de pagos, abonos y reversiones con trazabilidad de saldos
+              Registro inmutable de cuotas, abonos y reversiones con trazabilidad total
             </p>
           </div>
         </div>
@@ -177,68 +193,65 @@ export default function HistorialPage() {
         <div className="flex items-center gap-2">
           <button
             onClick={exportToExcel}
-            className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-emerald-600/20 border border-emerald-500/30 hover:bg-emerald-600/30 text-emerald-300 text-xs font-bold transition-colors"
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/30 text-xs font-bold transition-colors"
           >
-            <FileSpreadsheet className="w-4 h-4 text-emerald-400" />
-            <span>Excel (.xlsx)</span>
+            <FileSpreadsheet className="w-4 h-4" />
+            <span>Exportar Excel</span>
           </button>
-
           <button
             onClick={exportToPDF}
-            className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-red-600/20 border border-red-500/30 hover:bg-red-600/30 text-red-300 text-xs font-bold transition-colors"
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-red-600/20 hover:bg-red-600/30 text-red-300 border border-red-500/30 text-xs font-bold transition-colors"
           >
-            <FileText className="w-4 h-4 text-red-400" />
-            <span>PDF (.pdf)</span>
+            <FileText className="w-4 h-4" />
+            <span>Exportar PDF</span>
           </button>
         </div>
       </div>
 
-      {/* BARRA DE FILTROS */}
-      <div className="p-4 rounded-2xl bg-slate-900/80 border border-slate-800 flex flex-wrap items-center justify-between gap-4">
-        <div className="flex flex-wrap items-center gap-3">
-          {/* Búsqueda */}
-          <div className="relative">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
-            <input
-              type="text"
-              placeholder="Buscar por notas o ref..."
-              value={busqueda}
-              onChange={(e) => setBusqueda(e.target.value)}
-              className="pl-9 pr-3 py-1.5 rounded-xl bg-slate-800 border border-slate-700 text-white text-xs focus:outline-none focus:border-blue-500 w-48 sm:w-60"
-            />
-          </div>
+      {/* BARRA DE FILTROS & BÚSQUEDA */}
+      <div className="p-4 rounded-2xl bg-slate-900/60 border border-slate-800 grid grid-cols-1 sm:grid-cols-3 gap-3">
+        {/* Búsqueda */}
+        <div className="relative">
+          <Search className="w-4 h-4 absolute left-3.5 top-3 text-slate-500" />
+          <input
+            type="text"
+            placeholder="Buscar por acreedor, referencia, notas..."
+            value={busqueda}
+            onChange={(e) => setBusqueda(e.target.value)}
+            className="w-full pl-9 pr-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs focus:outline-none focus:border-blue-500"
+          />
+        </div>
 
-          {/* Filtro Entidad */}
+        {/* Filtro Acreedor */}
+        <div>
           <select
             value={filtroEntidad}
             onChange={(e) => setFiltroEntidad(e.target.value)}
-            className="px-3 py-1.5 rounded-xl bg-slate-800 border border-slate-700 text-white text-xs focus:outline-none focus:border-blue-500"
+            className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs focus:outline-none focus:border-blue-500"
           >
-            <option value="TODAS">Todas las Entidades</option>
+            <option value="TODAS">Todos los acreedores</option>
             {deudas.map((d) => (
               <option key={d.id} value={d.id}>
                 {d.entidad}
               </option>
             ))}
           </select>
+        </div>
 
-          {/* Filtro Tipo */}
+        {/* Filtro Tipo */}
+        <div>
           <select
             value={filtroTipo}
             onChange={(e) => setFiltroTipo(e.target.value)}
-            className="px-3 py-1.5 rounded-xl bg-slate-800 border border-slate-700 text-white text-xs focus:outline-none focus:border-blue-500"
+            className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs focus:outline-none focus:border-blue-500"
           >
-            <option value="TODOS">Todos los Tipos</option>
-            <option value="PAGO_CUOTA">Pago de Cuota</option>
-            <option value="ABONO_EXTRAORDINARIO">Abono Extraordinario</option>
-            <option value="PAGO_TOTAL">Pago Total</option>
-            <option value="REVERSION_PAGO">Reversión de Pago</option>
+            <option value="TODOS">Todos los tipos de movimiento</option>
+            <option value="PAGO_CUOTA">Pagos de Cuota</option>
+            <option value="ABONO_EXTRAORDINARIO">Abonos Extraordinarios</option>
+            <option value="PAGO_TOTAL">Cancelación Total</option>
+            <option value="REVERSION_PAGO">Reversiones Auditables</option>
           </select>
         </div>
-
-        <span className="text-xs text-slate-400 font-semibold">
-          {movimientosFiltrados.length} movimientos
-        </span>
       </div>
 
       {/* TABLA DE MOVIMIENTOS */}
@@ -252,7 +265,7 @@ export default function HistorialPage() {
               <th className="py-3.5 px-4 text-right">Valor</th>
               <th className="py-3.5 px-4 text-right">Saldo Ant.</th>
               <th className="py-3.5 px-4 text-right">Saldo Post.</th>
-              <th className="py-3.5 px-4">Método / Ref.</th>
+              <th className="py-3.5 px-4">Método / Recibo</th>
               <th className="py-3.5 px-4">Estado</th>
               <th className="py-3.5 px-4 text-center">Acciones</th>
             </tr>
@@ -306,9 +319,26 @@ export default function HistorialPage() {
                   <td className="py-3 px-4 text-slate-300">
                     <div>{m.metodoPago}</div>
                     {m.referenciaPago && (
-                      <span className="text-[10px] text-slate-500 font-mono">
-                        {m.referenciaPago}
+                      <span className="text-[10px] text-slate-500 font-mono block">
+                        Ref: {m.referenciaPago}
                       </span>
+                    )}
+                    {m.comprobanteUrl && (
+                      <button
+                        onClick={() => {
+                          setComprobanteActivo({
+                            url: m.comprobanteUrl,
+                            entidad: m.deuda?.entidad || "Movimiento",
+                            monto: m.monto,
+                            fecha: m.fecha,
+                          });
+                          setComprobanteModalOpen(true);
+                        }}
+                        className="mt-1 inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 text-[10px] font-bold border border-emerald-500/20 transition-colors"
+                      >
+                        <Camera className="w-3 h-3" />
+                        <span>Ver Foto Recibo</span>
+                      </button>
                     )}
                   </td>
                   <td className="py-3 px-4">
@@ -433,6 +463,66 @@ export default function HistorialPage() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL VISOR DE COMPROBANTE / FOTO */}
+      {comprobanteModalOpen && comprobanteActivo && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-in fade-in duration-200">
+          <div className="relative w-full max-w-lg p-6 rounded-3xl bg-[#151F32] border border-slate-700 shadow-2xl text-slate-100 flex flex-col items-center">
+            <button
+              onClick={() => {
+                setComprobanteModalOpen(false);
+                setComprobanteActivo(null);
+              }}
+              className="absolute top-5 right-5 p-2 rounded-xl bg-slate-800 text-slate-400 hover:text-white"
+            >
+              <X className="w-4 h-4" />
+            </button>
+
+            <div className="w-full flex items-center gap-3 mb-4">
+              <div className="p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
+                <Camera className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="text-base font-bold text-white">Comprobante de Pago</h3>
+                <p className="text-xs text-slate-400">
+                  {comprobanteActivo.entidad} — {formatCOP(comprobanteActivo.monto)} ({formatDate(comprobanteActivo.fecha)})
+                </p>
+              </div>
+            </div>
+
+            {/* IMAGEN DEL COMPROBANTE */}
+            <div className="w-full max-h-[60vh] overflow-hidden rounded-2xl border border-slate-700 bg-black/60 flex items-center justify-center p-2 mb-4">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={comprobanteActivo.url}
+                alt="Comprobante de pago"
+                className="max-h-[55vh] w-auto object-contain rounded-xl shadow-lg"
+              />
+            </div>
+
+            <div className="w-full flex items-center justify-between gap-3 pt-2">
+              <a
+                href={comprobanteActivo.url}
+                download={`comprobante_${comprobanteActivo.entidad}_${new Date().getTime()}.png`}
+                className="flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold border border-slate-700 transition-colors"
+              >
+                <Download className="w-4 h-4 text-emerald-400" />
+                <span>Descargar Foto</span>
+              </a>
+
+              <button
+                onClick={() => {
+                  setComprobanteModalOpen(false);
+                  setComprobanteActivo(null);
+                }}
+                className="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold transition-colors"
+              >
+                Cerrar
+              </button>
+            </div>
           </div>
         </div>
       )}

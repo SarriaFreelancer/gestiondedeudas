@@ -1,12 +1,13 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { formatCOP } from "@/lib/formatters";
-import { PiggyBank, X, AlertCircle, Loader2, ArrowRight } from "lucide-react";
+import { PiggyBank, X, AlertCircle, Loader2, ArrowRight, Camera, FileCheck, Sparkles, TrendingDown } from "lucide-react";
 import { useFinancial } from "@/context/FinancialContext";
 
 export const AbonoModal: React.FC = () => {
   const { isAbonoModalOpen, setIsAbonoModalOpen, deudas, refreshData } = useFinancial();
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [deudaId, setDeudaId] = useState<string>("");
   const [tipo, setTipo] = useState<string>("ABONO_EXTRAORDINARIO");
@@ -14,6 +15,7 @@ export const AbonoModal: React.FC = () => {
   const [monto, setMonto] = useState<number>(50000);
   const [metodoPago, setMetodoPago] = useState<string>("TRANSFERENCIA");
   const [referenciaPago, setReferenciaPago] = useState<string>("");
+  const [comprobanteUrl, setComprobanteUrl] = useState<string>("");
   const [observaciones, setObservaciones] = useState<string>("");
   const [submitting, setSubmitting] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -37,6 +39,22 @@ export const AbonoModal: React.FC = () => {
     }
   };
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 4 * 1024 * 1024) {
+      setErrorMessage("El comprobante no debe superar los 4 MB");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setComprobanteUrl(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+  };
+
   const handleAbonar = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!deudaId) return;
@@ -55,6 +73,7 @@ export const AbonoModal: React.FC = () => {
           destinoAbono,
           metodoPago,
           referenciaPago: referenciaPago.trim() || undefined,
+          comprobanteUrl: comprobanteUrl || undefined,
           observaciones: observaciones.trim() || undefined,
         }),
       });
@@ -73,9 +92,12 @@ export const AbonoModal: React.FC = () => {
     }
   };
 
+  // Cálculo de ahorro proyectado en intereses (promedio Colombia 24.5% EA por tiempo evitado)
+  const ahorroInteresEstimado = Math.round(Number(monto || 0) * 0.22);
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="relative w-full max-w-lg p-6 rounded-3xl bg-[#151F32] border border-slate-700 shadow-2xl text-slate-100">
+      <div className="relative w-full max-w-lg p-6 rounded-3xl bg-[#151F32] border border-slate-700 shadow-2xl text-slate-100 max-h-[90vh] overflow-y-auto">
         <button
           onClick={() => setIsAbonoModalOpen(false)}
           className="absolute top-5 right-5 p-2 rounded-xl bg-slate-800 text-slate-400 hover:text-white"
@@ -144,6 +166,24 @@ export const AbonoModal: React.FC = () => {
                     Math.max(0, Number(deudaSeleccionada.saldoPendiente) - Number(monto || 0))
                   )}
                 </span>
+              </div>
+            </div>
+          )}
+
+          {/* Banner de Ahorro Proyectado de Intereses */}
+          {Number(monto) > 0 && (
+            <div className="p-3 rounded-2xl bg-emerald-950/40 border border-emerald-500/30 flex items-center gap-3">
+              <div className="p-2 rounded-xl bg-emerald-500/20 text-emerald-400">
+                <Sparkles className="w-5 h-5" />
+              </div>
+              <div className="text-xs">
+                <p className="font-bold text-emerald-300">
+                  ¡Ahorro estimado en intereses futuros!
+                </p>
+                <p className="text-slate-300">
+                  Al abonar {formatCOP(monto)} a capital, evitas pagar aproximadamente{" "}
+                  <strong className="text-white">{formatCOP(ahorroInteresEstimado)}</strong> en cobros financieros futuros.
+                </p>
               </div>
             </div>
           )}
@@ -226,7 +266,7 @@ export const AbonoModal: React.FC = () => {
 
             <div>
               <label className="block text-xs font-semibold text-slate-300 mb-1">
-                No. Comprobante
+                No. Comprobante / Ref
               </label>
               <input
                 type="text"
@@ -234,6 +274,45 @@ export const AbonoModal: React.FC = () => {
                 value={referenciaPago}
                 onChange={(e) => setReferenciaPago(e.target.value)}
                 className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs focus:outline-none focus:border-blue-500"
+              />
+            </div>
+          </div>
+
+          {/* Adjuntar Foto Comprobante */}
+          <div>
+            <label className="block text-xs font-semibold text-slate-300 mb-1">
+              Foto o Captura del Comprobante (Opcional)
+            </label>
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className="flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-200 border border-slate-700 transition-colors"
+              >
+                <Camera className="w-4 h-4 text-emerald-400" />
+                <span>{comprobanteUrl ? "Cambiar foto de recibo" : "Subir pantallazo / foto"}</span>
+              </button>
+
+              {comprobanteUrl && (
+                <div className="flex items-center gap-2 text-xs text-emerald-400 font-semibold">
+                  <FileCheck className="w-4 h-4" />
+                  <span>Comprobante adjunto</span>
+                  <button
+                    type="button"
+                    onClick={() => setComprobanteUrl("")}
+                    className="text-[11px] text-red-400 hover:text-red-300 ml-1"
+                  >
+                    Quitar
+                  </button>
+                </div>
+              )}
+
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleFileChange}
               />
             </div>
           </div>

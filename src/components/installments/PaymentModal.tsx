@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { formatCOP, formatDate } from "@/lib/formatters";
-import { CheckCircle2, X, AlertCircle, Loader2, ArrowRight } from "lucide-react";
+import { CheckCircle2, X, AlertCircle, Loader2, ArrowRight, Camera, FileCheck } from "lucide-react";
 import { useFinancial } from "@/context/FinancialContext";
 
 export const PaymentModal: React.FC = () => {
@@ -14,9 +14,12 @@ export const PaymentModal: React.FC = () => {
     refreshData,
   } = useFinancial();
 
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   const [monto, setMonto] = useState<number>(0);
   const [metodoPago, setMetodoPago] = useState<string>("TRANSFERENCIA");
   const [referenciaPago, setReferenciaPago] = useState<string>("");
+  const [comprobanteUrl, setComprobanteUrl] = useState<string>("");
   const [observaciones, setObservaciones] = useState<string>("");
   const [submitting, setSubmitting] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -26,6 +29,7 @@ export const PaymentModal: React.FC = () => {
     if (selectedCuotaForPayment) {
       setMonto(Number(selectedCuotaForPayment.valor));
       setReferenciaPago("");
+      setComprobanteUrl("");
       setObservaciones("");
       setErrorMessage(null);
     }
@@ -34,6 +38,22 @@ export const PaymentModal: React.FC = () => {
   if (!isPaymentModalOpen || !selectedDeudaForPayment || !selectedCuotaForPayment) {
     return null;
   }
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 4 * 1024 * 1024) {
+      setErrorMessage("El comprobante no debe superar los 4 MB");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setComprobanteUrl(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+  };
 
   const handleConfirmPayment = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -50,6 +70,7 @@ export const PaymentModal: React.FC = () => {
           monto: Number(monto),
           metodoPago,
           referenciaPago: referenciaPago.trim() || undefined,
+          comprobanteUrl: comprobanteUrl || undefined,
           observaciones: observaciones.trim() || undefined,
         }),
       });
@@ -169,6 +190,45 @@ export const PaymentModal: React.FC = () => {
                 className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs focus:outline-none focus:border-blue-500"
               >
               </input>
+            </div>
+          </div>
+
+          {/* SUBIR COMPROBANTE DE PAGO */}
+          <div>
+            <label className="block text-xs font-semibold text-slate-300 mb-1">
+              Foto del Comprobante / Recibo (Opcional)
+            </label>
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className="flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-200 border border-slate-700 transition-colors"
+              >
+                <Camera className="w-4 h-4 text-emerald-400" />
+                <span>{comprobanteUrl ? "Cambiar foto de recibo" : "Subir pantallazo / foto"}</span>
+              </button>
+
+              {comprobanteUrl && (
+                <div className="flex items-center gap-2 text-xs text-emerald-400 font-semibold">
+                  <FileCheck className="w-4 h-4" />
+                  <span>Comprobante adjunto</span>
+                  <button
+                    type="button"
+                    onClick={() => setComprobanteUrl("")}
+                    className="text-[11px] text-red-400 hover:text-red-300 ml-1"
+                  >
+                    Quitar
+                  </button>
+                </div>
+              )}
+
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleFileChange}
+              />
             </div>
           </div>
 

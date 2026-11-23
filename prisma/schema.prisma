@@ -106,6 +106,7 @@ model Movimiento {
   fecha                 DateTime        @default(now())
   metodoPago            String?         @default("TRANSFERENCIA")
   referenciaPago        String?
+  comprobanteUrl        String?         @db.LongText
   observaciones         String?         @db.Text
   destinoAbono          DestinoAbono?   @default(REDUCIR_CAPITAL)
   estaRevertido         Boolean         @default(false)

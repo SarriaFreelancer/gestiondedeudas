@@ -11,7 +11,8 @@ import {
   Filter,
   Loader2,
   PlusCircle,
-  Edit3,
+  Download,
+  ExternalLink,
 } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { EditDebtModal } from "@/components/debts/EditDebtModal";
@@ -62,6 +63,25 @@ function CuotasPageContent() {
     }
   };
 
+  // Helper para generar enlace directo a Google Calendar (para la cuenta de Google sarriafreelancer7@gmail.com)
+  const getGoogleCalendarUrl = (cuota: any) => {
+    const fecha = new Date(cuota.fechaVencimiento);
+    const yyyy = fecha.getUTCFullYear();
+    const mm = String(fecha.getUTCMonth() + 1).padStart(2, "0");
+    const dd = String(fecha.getUTCDate()).padStart(2, "0");
+    const dateFormatted = `${yyyy}${mm}${dd}`;
+    const dates = `${dateFormatted}T140000Z/${dateFormatted}T150000Z`;
+
+    const titulo = encodeURIComponent(
+      `💰 Pagar Cuota #${cuota.numeroCuota} ${deudaActual?.entidad || "Deuda"} ($${Number(cuota.valor).toLocaleString("es-CO")})`
+    );
+    const detalles = encodeURIComponent(
+      `Recordatorio de vencimiento de cuota de ${deudaActual?.entidad}\nValor: $${Number(cuota.valor).toLocaleString("es-CO")} COP\nSincronizado desde Mi Libertad Financiera.`
+    );
+
+    return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${titulo}&dates=${dates}&details=${detalles}`;
+  };
+
   return (
     <div className="space-y-6">
       {/* HEADER */}
@@ -105,6 +125,17 @@ function CuotasPageContent() {
               <span>Añadir / Ajustar Cuotas</span>
             </button>
           )}
+
+          {/* Sincronización Google Calendar */}
+          <a
+            href="/api/calendario"
+            download="cuotas_libertad_financiera.ics"
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/30 text-xs font-bold transition-colors"
+            title="Descargar agenda de cuotas (.ics) para sincronizar en Google Calendar"
+          >
+            <Calendar className="w-3.5 h-3.5" />
+            <span>Sincronizar Google Calendar</span>
+          </a>
         </div>
       </div>
 
@@ -239,19 +270,32 @@ function CuotasPageContent() {
                 </div>
               </div>
 
-              {/* Valor y Acción */}
-              <div className="flex items-center justify-between sm:justify-end gap-4">
+              {/* Valor y Acciones */}
+              <div className="flex items-center justify-between sm:justify-end gap-3">
                 <span className="text-base font-extrabold text-white">
                   {formatCOP(cuota.valor)}
                 </span>
 
                 {!isPagada ? (
-                  <button
-                    onClick={() => handleSelectCuotaParaPagar(cuota)}
-                    className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold transition-all shadow-md shadow-blue-600/30"
-                  >
-                    <span>Pagar Cuota</span>
-                  </button>
+                  <div className="flex items-center gap-2">
+                    {/* Botón directo a Google Calendar */}
+                    <a
+                      href={getGoogleCalendarUrl(cuota)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 transition-colors"
+                      title="Agendar en Google Calendar (sarriafreelancer7@gmail.com)"
+                    >
+                      <Calendar className="w-4 h-4 text-emerald-400" />
+                    </a>
+
+                    <button
+                      onClick={() => handleSelectCuotaParaPagar(cuota)}
+                      className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold transition-all shadow-md shadow-blue-600/30"
+                    >
+                      <span>Pagar Cuota</span>
+                    </button>
+                  </div>
                 ) : (
                   <span className="text-xs font-semibold text-emerald-400 px-3 py-1 rounded-lg bg-emerald-500/10">
                     Saldada

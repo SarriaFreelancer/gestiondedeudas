@@ -11,6 +11,7 @@ export const pagoCuotaSchema = z.object({
   monto: z.number().positive("El monto debe ser mayor a 0").optional(),
   metodoPago: z.string().default("TRANSFERENCIA"),
   referenciaPago: z.string().optional(),
+  comprobanteUrl: z.string().optional(),
   observaciones: z.string().optional(),
 });
 
@@ -21,6 +22,7 @@ export const abonoSchema = z.object({
   destinoAbono: z.enum(["REDUCIR_CAPITAL", "CUBRIR_MORA", "ADELANTAR_CUOTAS"]).default("REDUCIR_CAPITAL"),
   metodoPago: z.string().default("TRANSFERENCIA"),
   referenciaPago: z.string().optional(),
+  comprobanteUrl: z.string().optional(),
   observaciones: z.string().optional(),
 });
 
