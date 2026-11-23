@@ -8,20 +8,20 @@ import {
   PlusCircle,
   Calendar,
   AlertTriangle,
-  CheckCircle2,
-  Clock,
   PiggyBank,
   CheckSquare,
   Trash2,
-  ExternalLink,
   CreditCard,
+  Edit3,
 } from "lucide-react";
 import Link from "next/link";
 import { CreateDebtModal } from "@/components/debts/CreateDebtModal";
+import { EditDebtModal } from "@/components/debts/EditDebtModal";
 
 export default function DeudasPage() {
   const { deudas, refreshData, setSelectedDeudaForPayment, setIsAbonoModalOpen } = useFinancial();
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [editingDebt, setEditingDebt] = useState<any | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const handleDeleteDebt = async (id: string, entidad: string) => {
@@ -48,7 +48,7 @@ export default function DeudasPage() {
   return (
     <div className="space-y-6">
       {/* HEADER */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 rounded-3xl bg-[#151F32] border border-slate-800 shadow-xl">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 rounded-3xl bg-[#091122] border border-slate-800 shadow-xl">
         <div className="flex items-center gap-3">
           <div className="p-3 rounded-2xl bg-blue-500/10 border border-blue-500/20 text-blue-400">
             <WalletCards className="w-6 h-6" />
@@ -56,7 +56,7 @@ export default function DeudasPage() {
           <div>
             <h1 className="text-xl sm:text-2xl font-black text-white">Módulo de Gestión de Deudas</h1>
             <p className="text-xs text-slate-400">
-              Control individual de tus 5 obligaciones comerciales y planes de pago
+              Edita valores, concilia saldos, gestiona cuotas y agrega nuevos plazos a tus obligaciones
             </p>
           </div>
         </div>
@@ -83,7 +83,7 @@ export default function DeudasPage() {
           return (
             <div
               key={deuda.id}
-              className={`relative overflow-hidden p-6 rounded-3xl bg-[#151F32] border transition-all duration-300 flex flex-col justify-between ${
+              className={`relative overflow-hidden p-6 rounded-3xl bg-[#091122] border transition-all duration-300 flex flex-col justify-between ${
                 esPagada
                   ? "border-emerald-500/40 shadow-emerald-500/10"
                   : esMora
@@ -103,22 +103,31 @@ export default function DeudasPage() {
                     )}
                   </div>
 
-                  {/* BADGE DE ESTADO */}
-                  <span
-                    className={`text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider border ${
-                      esPagada
-                        ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/30"
-                        : esMora
-                        ? "bg-red-500/20 text-red-400 border-red-500/30"
-                        : "bg-blue-500/20 text-blue-400 border-blue-500/30"
-                    }`}
-                  >
-                    {deuda.estado.replace("_", " ")}
-                  </span>
+                  {/* BADGE DE ESTADO Y BOTÓN EDITAR RÁPIDO */}
+                  <div className="flex items-center gap-1.5">
+                    <button
+                      onClick={() => setEditingDebt(deuda)}
+                      className="p-1.5 rounded-lg bg-slate-800 hover:bg-blue-600/30 text-slate-400 hover:text-blue-300 transition-colors"
+                      title="Editar Deuda y Cuotas"
+                    >
+                      <Edit3 className="w-4 h-4" />
+                    </button>
+                    <span
+                      className={`text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider border ${
+                        esPagada
+                          ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/30"
+                          : esMora
+                          ? "bg-red-500/20 text-red-400 border-red-500/30"
+                          : "bg-blue-500/20 text-blue-400 border-blue-500/30"
+                      }`}
+                    >
+                      {deuda.estado.replace("_", " ")}
+                    </span>
+                  </div>
                 </div>
 
                 {/* SALDO PENDIENTE PROTAGONISTA */}
-                <div className="my-4 p-4 rounded-2xl bg-slate-900/80 border border-slate-800/80">
+                <div className="my-4 p-4 rounded-2xl bg-[#0F172A] border border-slate-800/80">
                   <span className="text-[10px] font-bold tracking-wider text-slate-400 uppercase">
                     Saldo Pendiente Actual
                   </span>
@@ -141,7 +150,7 @@ export default function DeudasPage() {
                   </div>
                 </div>
 
-                {/* DATOS DETALLADOS REQUERIDOS */}
+                {/* DATOS DETALLADOS */}
                 <div className="grid grid-cols-2 gap-2 text-xs py-2 border-y border-slate-800/80">
                   <div>
                     <span className="text-slate-400 block text-[11px]">Monto Original</span>
@@ -201,6 +210,14 @@ export default function DeudasPage() {
 
               {/* BOTONES DE ACCIÓN */}
               <div className="mt-6 pt-4 border-t border-slate-800 flex items-center gap-2">
+                <button
+                  onClick={() => setEditingDebt(deuda)}
+                  className="flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-blue-600/20 hover:bg-blue-600/30 text-blue-300 border border-blue-500/30 text-xs font-bold transition-colors"
+                >
+                  <Edit3 className="w-3.5 h-3.5" />
+                  <span>Editar / Cuotas</span>
+                </button>
+
                 {deuda.tieneCuotas ? (
                   <Link
                     href={`/cuotas?deudaId=${deuda.id}`}
@@ -215,10 +232,10 @@ export default function DeudasPage() {
                       setSelectedDeudaForPayment(deuda);
                       setIsAbonoModalOpen(true);
                     }}
-                    className="flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-xs font-bold text-white shadow-md shadow-blue-600/30 transition-all"
+                    className="flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-xs font-bold text-white shadow-md shadow-emerald-600/30 transition-all"
                   >
                     <CreditCard className="w-3.5 h-3.5" />
-                    <span>Pagar / Abonar</span>
+                    <span>Abonar</span>
                   </button>
                 )}
 
@@ -248,6 +265,11 @@ export default function DeudasPage() {
       </div>
 
       <CreateDebtModal isOpen={isCreateModalOpen} onClose={() => setIsCreateModalOpen(false)} />
+      <EditDebtModal
+        deuda={editingDebt}
+        isOpen={Boolean(editingDebt)}
+        onClose={() => setEditingDebt(null)}
+      />
     </div>
   );
 }

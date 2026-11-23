@@ -6,15 +6,15 @@ import { formatCOP, formatDate } from "@/lib/formatters";
 import {
   CheckSquare,
   Square,
-  AlertTriangle,
   CheckCircle2,
   Calendar,
   Filter,
-  CreditCard,
-  TrendingDown,
   Loader2,
+  PlusCircle,
+  Edit3,
 } from "lucide-react";
 import { useSearchParams } from "next/navigation";
+import { EditDebtModal } from "@/components/debts/EditDebtModal";
 
 function CuotasPageContent() {
   const { deudas, setSelectedDeudaForPayment, setSelectedCuotaForPayment, setIsPaymentModalOpen } =
@@ -31,6 +31,7 @@ function CuotasPageContent() {
   );
 
   const [filtroEstado, setFiltroEstado] = useState<string>("TODAS"); // TODAS, PENDIENTES, VENCIDAS, PAGADAS
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   // Sincronizar si cambia deudasConCuotas
   React.useEffect(() => {
@@ -79,8 +80,8 @@ function CuotasPageContent() {
           </div>
         </div>
 
-        {/* SELECTOR DE ENTIDAD CON CUOTAS */}
-        <div className="flex items-center gap-2">
+        {/* SELECTOR DE ENTIDAD CON CUOTAS & BOTON AGREGAR */}
+        <div className="flex flex-wrap items-center gap-2">
           <label className="text-xs font-semibold text-slate-400">Obligación:</label>
           <select
             value={selectedDeudaId}
@@ -93,6 +94,17 @@ function CuotasPageContent() {
               </option>
             ))}
           </select>
+
+          {deudaActual && (
+            <button
+              onClick={() => setIsEditModalOpen(true)}
+              className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-blue-600/20 hover:bg-blue-600/30 text-blue-300 border border-blue-500/30 text-xs font-bold transition-colors"
+              title="Añadir más cuotas o editar valor"
+            >
+              <PlusCircle className="w-3.5 h-3.5" />
+              <span>Añadir / Ajustar Cuotas</span>
+            </button>
+          )}
         </div>
       </div>
 
@@ -258,6 +270,12 @@ function CuotasPageContent() {
           </div>
         )}
       </div>
+
+      <EditDebtModal
+        deuda={deudaActual}
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+      />
     </div>
   );
 }
