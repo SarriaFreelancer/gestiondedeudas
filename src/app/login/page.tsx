@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Lock, Mail, ArrowRight, Loader2, Sparkles, ShieldCheck } from "lucide-react";
+import { Lock, Mail, ArrowRight, Loader2, ShieldCheck, CheckCircle2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { BrandLogo } from "@/components/ui/BrandLogo";
 
@@ -103,7 +103,7 @@ export default function LoginPage() {
 
           <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight flex items-center justify-center gap-2">
             <span>Bienvenido</span>
-            <Sparkles className="w-5 h-5 text-emerald-400" />
+            <ShieldCheck className="w-5 h-5 text-emerald-400" />
           </h2>
           <p className="text-xs text-slate-300 mt-1">
             Ingreso privado a tu sistema personal de libertad financiera

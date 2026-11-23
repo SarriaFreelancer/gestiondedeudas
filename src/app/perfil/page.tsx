@@ -20,7 +20,6 @@ import {
   Calendar,
   Database,
   ExternalLink,
-  Sparkles,
 } from "lucide-react";
 import { AppAlert } from "@/lib/alerts";
 

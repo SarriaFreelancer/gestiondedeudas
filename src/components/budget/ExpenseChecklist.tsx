@@ -10,7 +10,6 @@ import {
   Trash2,
   Camera,
   Layers,
-  Sparkles,
   PlusCircle,
 } from "lucide-react";
 import { AppAlert } from "@/lib/alerts";

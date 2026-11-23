@@ -15,7 +15,7 @@ import { AddExpenseModal } from "./AddExpenseModal";
 import { PayExpenseModal } from "./PayExpenseModal";
 import { TransferSurplusModal } from "./TransferSurplusModal";
 import { CreateGoalModal } from "./CreateGoalModal";
-import { Loader2, Coins, Edit3, Plus, TrendingUp, Sparkles } from "lucide-react";
+import { Loader2, Coins, Edit3, Plus, TrendingUp } from "lucide-react";
 import { formatCOP } from "@/lib/formatters";
 
 export const BudgetDashboardView: React.FC = () => {

@@ -12,7 +12,7 @@ import {
   CheckCircle2,
   Building2,
   ArrowRight,
-  Sparkles,
+  Send,
 } from "lucide-react";
 import { AppAlert } from "@/lib/alerts";
 

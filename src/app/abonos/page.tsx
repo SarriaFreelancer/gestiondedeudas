@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { useFinancial } from "@/context/FinancialContext";
 import { formatCOP, formatDate } from "@/lib/formatters";
-import { PiggyBank, PlusCircle, CreditCard, Sparkles, CheckCircle2, ArrowRight } from "lucide-react";
+import { PiggyBank, PlusCircle, CreditCard, CheckCircle2, ArrowRight, Zap } from "lucide-react";
 
 export default function AbonosPage() {
   const { deudas, setIsAbonoModalOpen, setSelectedDeudaForPayment } = useFinancial();
@@ -103,7 +103,7 @@ export default function AbonosPage() {
       {/* SECCIÓN 2: ABONOS EXTRAORDINARIOS A CRÉDITOS FIJOS (NEQUI, DAVIVIENDA, CRÉDITO 20 MINUTOS) */}
       <div>
         <div className="flex items-center gap-2 mb-4">
-          <Sparkles className="w-4 h-4 text-blue-400" />
+          <Zap className="w-4 h-4 text-amber-400" />
           <h2 className="text-sm font-bold uppercase tracking-wider text-slate-300">
             Aceleración de Créditos Fijos (Abonos extraordinarios a capital o mora)
           </h2>

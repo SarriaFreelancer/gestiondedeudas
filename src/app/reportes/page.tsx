@@ -5,7 +5,6 @@ import { formatCOP, formatPercentage } from "@/lib/formatters";
 import { useFinancial } from "@/context/FinancialContext";
 import {
   LineChart as LineChartIcon,
-  Sparkles,
   Zap,
   Calendar,
   Clock,

@@ -7,7 +7,6 @@ import {
   Calendar,
   ChevronLeft,
   ChevronRight,
-  Sparkles,
   History,
   TrendingDown,
   ArrowRight,
@@ -103,9 +102,9 @@ export const DebtMonthSelector: React.FC = () => {
         {!esMesActual ? (
           <button
             onClick={irAMesActual}
-            className="w-full sm:w-auto flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white text-xs font-bold transition-all shadow-lg shadow-cyan-500/20 animate-pulse"
+            className="w-full sm:w-auto flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white text-xs font-bold transition-all shadow-lg shadow-cyan-500/20"
           >
-            <Sparkles className="w-3.5 h-3.5" />
+            <RotateCcw className="w-3.5 h-3.5" />
             <span>Volver a Mes Actual (Lo que debo hoy)</span>
           </button>
         ) : (

@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Sparkles, Trophy } from "lucide-react";
+import { Trophy } from "lucide-react";
 
 interface BudgetProgressBarProps {
   porcentajeDisponible: number;

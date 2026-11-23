@@ -2,7 +2,7 @@
 
 import React, { useState, useRef } from "react";
 import { formatCOP } from "@/lib/formatters";
-import { PiggyBank, X, AlertCircle, Loader2, ArrowRight, Camera, FileCheck, Sparkles, TrendingDown } from "lucide-react";
+import { PiggyBank, X, AlertCircle, Loader2, ArrowRight, Camera, FileCheck, TrendingDown, ArrowUpRight } from "lucide-react";
 import { useFinancial } from "@/context/FinancialContext";
 
 export const AbonoModal: React.FC = () => {
@@ -174,7 +174,7 @@ export const AbonoModal: React.FC = () => {
           {Number(monto) > 0 && (
             <div className="p-3 rounded-2xl bg-emerald-950/40 border border-emerald-500/30 flex items-center gap-3">
               <div className="p-2 rounded-xl bg-emerald-500/20 text-emerald-400">
-                <Sparkles className="w-5 h-5" />
+                <ArrowUpRight className="w-5 h-5" />
               </div>
               <div className="text-xs">
                 <p className="font-bold text-emerald-300">

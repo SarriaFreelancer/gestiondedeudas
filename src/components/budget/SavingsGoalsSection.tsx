@@ -10,8 +10,8 @@ import {
   ArrowUpRight,
   CheckCircle2,
   Building2,
-  Sparkles,
   Calendar,
+  Send,
 } from "lucide-react";
 
 export const SavingsGoalsSection: React.FC = () => {
@@ -52,7 +52,7 @@ export const SavingsGoalsSection: React.FC = () => {
               onClick={() => setIsTransferModalOpen(true)}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-bold transition-all shadow-lg shadow-emerald-600/20"
             >
-              <Sparkles className="w-3.5 h-3.5 text-emerald-200" />
+              <Send className="w-3.5 h-3.5 text-emerald-200" />
               <span>
                 <span className="hidden sm:inline">Trasladar Sobrante</span>
                 <span className="sm:hidden">Aportar</span> ({formatCOP(saldoDisponible)})
