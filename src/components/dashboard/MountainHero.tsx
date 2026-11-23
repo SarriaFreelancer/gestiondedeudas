@@ -1,12 +1,12 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { RotateCw } from "lucide-react";
+import { RotateCw, Menu } from "lucide-react";
 import { useFinancial } from "@/context/FinancialContext";
 import { BrandLogo } from "../ui/BrandLogo";
 
 export const MountainHero: React.FC = () => {
-  const { refreshData, loading } = useFinancial();
+  const { refreshData, loading, setIsMobileMenuOpen } = useFinancial();
   const [timeStr, setTimeStr] = useState("9:41 a.m.");
 
   useEffect(() => {
@@ -24,7 +24,8 @@ export const MountainHero: React.FC = () => {
   }, []);
 
   return (
-    <div className="relative w-full overflow-hidden rounded-3xl bg-[#091122] border border-blue-900/30 mb-4 sm:mb-6 shadow-2xl">
+    // Espacio superior elegante (mt-2 sm:mt-4) para bajar la imagen y despegarla del notch / borde del teléfono
+    <div className="relative w-full overflow-hidden rounded-3xl bg-[#091122] border border-blue-900/30 mt-2 sm:mt-4 mb-4 sm:mb-6 shadow-2xl">
       {/* Fondo de cordillera de montañas con resplandor y flecha ascendente */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
         {/* Glow azul celestial */}
@@ -81,9 +82,19 @@ export const MountainHero: React.FC = () => {
 
       {/* Contenido en primer plano */}
       <div className="relative z-10 p-4 sm:p-7 flex flex-col justify-between">
-        {/* FILA SUPERIOR: Logo Oficial (idéntico a la imagen) */}
-        <div className="flex items-center justify-between pb-3 mb-3 border-b border-blue-900/30">
+        {/* FILA SUPERIOR IDÉNTICA A LA IMAGEN: Logo a la izquierda y Botón Menú Hamburguesa (≡) a la derecha */}
+        <div className="flex items-center justify-between pb-3.5 mb-3 border-b border-blue-900/30">
           <BrandLogo />
+
+          {/* Botón de Menú lateral en móvil (≡) */}
+          <button
+            onClick={() => setIsMobileMenuOpen(true)}
+            className="lg:hidden p-2 rounded-xl bg-slate-900/70 border border-slate-700/60 text-slate-200 hover:text-white hover:bg-slate-800 transition-colors"
+            title="Abrir menú de navegación"
+            aria-label="Abrir menú"
+          >
+            <Menu className="w-5 h-5 stroke-[2.2]" />
+          </button>
         </div>
 
         {/* FILA INFERIOR: Saludo y Pastilla "Actualizado hoy" */}
@@ -100,7 +111,7 @@ export const MountainHero: React.FC = () => {
             </p>
           </div>
 
-          {/* Pastilla "Actualizado hoy" idéntica a la foto */}
+          {/* Pastilla "Actualizado hoy" */}
           <button
             onClick={() => refreshData()}
             disabled={loading}

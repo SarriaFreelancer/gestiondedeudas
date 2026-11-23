@@ -17,6 +17,7 @@ import {
   X,
 } from "lucide-react";
 import { BrandLogo } from "../ui/BrandLogo";
+import { useFinancial } from "@/context/FinancialContext";
 
 const NAV_ITEMS = [
   { href: "/", label: "Dashboard Deudas", icon: LayoutDashboard },
@@ -29,11 +30,20 @@ const NAV_ITEMS = [
   { href: "/perfil", label: "Perfil & Ajustes", icon: User },
 ];
 
-export const Sidebar: React.FC<{ isOpenMobile: boolean; onCloseMobile: () => void }> = ({
+export const Sidebar: React.FC<{ isOpenMobile?: boolean; onCloseMobile?: () => void }> = ({
   isOpenMobile,
   onCloseMobile,
 }) => {
   const pathname = usePathname();
+  const { isMobileMenuOpen, setIsMobileMenuOpen } = useFinancial();
+
+  // Se abre si viene por prop o por el contexto global de la aplicación
+  const isDrawerOpen = isOpenMobile || isMobileMenuOpen;
+
+  const handleClose = () => {
+    setIsMobileMenuOpen(false);
+    if (onCloseMobile) onCloseMobile();
+  };
 
   const handleLogout = async () => {
     try {
@@ -51,8 +61,9 @@ export const Sidebar: React.FC<{ isOpenMobile: boolean; onCloseMobile: () => voi
         <div className="flex items-center justify-between px-1 py-3 mb-6 border-b border-slate-800">
           <BrandLogo />
           <button
-            onClick={onCloseMobile}
-            className="lg:hidden p-1.5 rounded-xl bg-slate-800 text-slate-400 hover:text-white"
+            onClick={handleClose}
+            className="lg:hidden p-1.5 rounded-xl bg-slate-800 text-slate-400 hover:text-white transition-colors"
+            title="Cerrar menú"
           >
             <X className="w-5 h-5" />
           </button>
@@ -67,7 +78,7 @@ export const Sidebar: React.FC<{ isOpenMobile: boolean; onCloseMobile: () => voi
               <Link
                 key={item.href}
                 href={item.href}
-                onClick={onCloseMobile}
+                onClick={handleClose}
                 className={`flex items-center gap-3 px-3.5 py-3 rounded-xl text-xs font-semibold transition-all duration-200 ${
                   isActive
                     ? "bg-[#2F80ED] text-white shadow-lg shadow-blue-600/30 font-bold"
@@ -86,7 +97,7 @@ export const Sidebar: React.FC<{ isOpenMobile: boolean; onCloseMobile: () => voi
       <div className="pt-4 border-t border-slate-800">
         <Link
           href="/perfil"
-          onClick={onCloseMobile}
+          onClick={handleClose}
           className="block p-3 rounded-xl bg-slate-900/60 border border-slate-800 hover:border-slate-700 transition-colors mb-3 text-xs text-slate-400 group"
         >
           <div className="flex items-center justify-between">
@@ -117,12 +128,12 @@ export const Sidebar: React.FC<{ isOpenMobile: boolean; onCloseMobile: () => voi
         {navContent}
       </aside>
 
-      {/* Drawer Móvil (solo se abre si el usuario presiona el menú en móvil) */}
-      {isOpenMobile && (
+      {/* Drawer Móvil (se desliza suavemente desde el lateral al pulsar el menú hamburguesa ≡) */}
+      {isDrawerOpen && (
         <div className="lg:hidden fixed inset-0 z-50 flex animate-in fade-in duration-200">
           <div
             className="fixed inset-0 bg-black/75 backdrop-blur-sm"
-            onClick={onCloseMobile}
+            onClick={handleClose}
           />
           <div className="relative flex flex-col w-72 max-w-[85%] bg-[#091122] border-r border-slate-800 z-50 animate-in slide-in-from-left duration-200 shadow-2xl">
             {navContent}

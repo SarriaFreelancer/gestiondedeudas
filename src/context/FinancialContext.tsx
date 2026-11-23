@@ -39,6 +39,8 @@ interface FinancialContextType {
   setIsPaymentModalOpen: (open: boolean) => void;
   isAbonoModalOpen: boolean;
   setIsAbonoModalOpen: (open: boolean) => void;
+  isMobileMenuOpen: boolean;
+  setIsMobileMenuOpen: (open: boolean) => void;
 }
 
 const FinancialContext = createContext<FinancialContextType | undefined>(undefined);
@@ -53,6 +55,7 @@ export function FinancialProvider({ children }: { children: React.ReactNode }) {
   const [selectedCuotaForPayment, setSelectedCuotaForPayment] = useState<any | null>(null);
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState<boolean>(false);
   const [isAbonoModalOpen, setIsAbonoModalOpen] = useState<boolean>(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState<boolean>(false);
 
   const refreshData = useCallback(async () => {
     try {
@@ -73,7 +76,7 @@ export function FinancialProvider({ children }: { children: React.ReactNode }) {
       setError(null);
     } catch (err: any) {
       console.error("Error refreshing financial data:", err);
-      setError(err.message || "Error al sincronizar con la base de datos");
+      setError(err.message || "Error al sincronizar con MySQL");
     } finally {
       setLoading(false);
     }
@@ -99,6 +102,8 @@ export function FinancialProvider({ children }: { children: React.ReactNode }) {
         setIsPaymentModalOpen,
         isAbonoModalOpen,
         setIsAbonoModalOpen,
+        isMobileMenuOpen,
+        setIsMobileMenuOpen,
       }}
     >
       {children}
@@ -109,7 +114,7 @@ export function FinancialProvider({ children }: { children: React.ReactNode }) {
 export function useFinancial() {
   const context = useContext(FinancialContext);
   if (!context) {
-    throw new Error("useFinancial must be used within a FinancialProvider");
+    throw new Error("useFinancial debe ser utilizado dentro de FinancialProvider");
   }
   return context;
 }

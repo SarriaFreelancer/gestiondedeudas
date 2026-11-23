@@ -252,10 +252,10 @@ export const BottomNav: React.FC = () => {
         </div>
       )}
 
-      {/* BARRA DE NAVEGACIÓN INFERIOR EXCLUSIVA PARA MÓVIL (lg:hidden) */}
+      {/* BARRA DE NAVEGACIÓN INFERIOR EXCLUSIVA PARA MÓVIL (IDÉNTICA A LA IMAGEN DE REFERENCIA) */}
       <nav className="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-[#070D1A]/95 border-t border-slate-800/80 backdrop-blur-xl px-4 py-2 sm:py-2.5 max-w-lg mx-auto sm:rounded-t-3xl shadow-2xl">
         <div className="flex items-center justify-between relative px-2">
-          {/* Botón 1: Inicio / Deudas */}
+          {/* Botón 1: Inicio */}
           <Link
             href="/"
             className={`flex flex-col items-center gap-1 py-1 transition-colors ${
@@ -266,15 +266,15 @@ export const BottomNav: React.FC = () => {
             <span className="text-[10px] font-bold">Inicio</span>
           </Link>
 
-          {/* Botón 2: Presupuesto & Salario */}
+          {/* Botón 2: Mis Deudas */}
           <Link
-            href="/presupuesto"
+            href="/deudas"
             className={`flex flex-col items-center gap-1 py-1 transition-colors ${
-              pathname === "/presupuesto" ? "text-emerald-400 font-bold" : "text-slate-400 hover:text-slate-200"
+              pathname === "/deudas" ? "text-[#2F80ED]" : "text-slate-400 hover:text-slate-200"
             }`}
           >
-            <Coins className="w-5 h-5" />
-            <span className="text-[10px] font-bold">Salario</span>
+            <Wallet className="w-5 h-5" />
+            <span className="text-[10px] font-bold">Mis Deudas</span>
           </Link>
 
           {/* Botón Central Flotante (+): Abre Acciones Rápidas */}
@@ -288,15 +288,15 @@ export const BottomNav: React.FC = () => {
             </button>
           </div>
 
-          {/* Botón 4: Mis Deudas */}
+          {/* Botón 4: Reportes */}
           <Link
-            href="/deudas"
+            href="/reportes"
             className={`flex flex-col items-center gap-1 py-1 transition-colors ${
-              pathname === "/deudas" ? "text-[#2F80ED]" : "text-slate-400 hover:text-slate-200"
+              pathname === "/reportes" ? "text-[#2F80ED]" : "text-slate-400 hover:text-slate-200"
             }`}
           >
-            <Wallet className="w-5 h-5" />
-            <span className="text-[10px] font-bold">Deudas</span>
+            <BarChart2 className="w-5 h-5" />
+            <span className="text-[10px] font-bold">Reportes</span>
           </Link>
 
           {/* Botón 5: Más */}
