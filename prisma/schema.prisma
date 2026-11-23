@@ -1,0 +1,132 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum EstadoDeuda {
+  ACTIVA
+  EN_MORA
+  AL_DIA
+  PAGADA
+}
+
+enum EstadoCuota {
+  PENDIENTE
+  PAGADA
+  VENCIDA
+}
+
+enum TipoMovimiento {
+  PAGO_CUOTA
+  ABONO_EXTRAORDINARIO
+  PAGO_TOTAL
+  AJUSTE_SALDO
+  REVERSION_PAGO
+}
+
+enum DestinoAbono {
+  REDUCIR_CAPITAL
+  CUBRIR_MORA
+  ADELANTAR_CUOTAS
+}
+
+model Usuario {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  nombre    String
+  password  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Deuda {
+  id                     String        @id @default(cuid())
+  entidad                String
+  referencia             String?
+  montoInicial           Decimal       @db.Decimal(15, 2)
+  saldoInicial           Decimal       @db.Decimal(15, 2)
+  saldoPendiente         Decimal       @db.Decimal(15, 2)
+  valorCuotaMensual      Decimal       @default(0) @db.Decimal(15, 2)
+  cuotasTotales          Int           @default(0)
+  cuotasPagadasIniciales Int           @default(0)
+  cuotasPendientes       Int           @default(0)
+  valorVencidoMora       Decimal       @default(0) @db.Decimal(15, 2)
+  cuotasEnMora           Int           @default(0)
+  fechaInicio            DateTime?
+  diaVencimiento         Int?          @default(5)
+  estado                 EstadoDeuda   @default(ACTIVA)
+  tieneCuotas            Boolean       @default(true)
+  observaciones          String?       @db.Text
+  orden                  Int           @default(0)
+  createdAt              DateTime      @default(now())
+  updatedAt              DateTime      @updatedAt
+
+  cuotas                 Cuota[]
+  movimientos            Movimiento[]
+
+  @@index([entidad])
+  @@index([estado])
+}
+
+model Cuota {
+  id               String       @id @default(cuid())
+  deudaId          String
+  numeroCuota      Int
+  valor            Decimal      @db.Decimal(15, 2)
+  fechaVencimiento DateTime
+  fechaPago        DateTime?
+  estado           EstadoCuota  @default(PENDIENTE)
+  esMora           Boolean      @default(false)
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+
+  deuda            Deuda        @relation(fields: [deudaId], references: [id], onDelete: Cascade)
+  movimientos      Movimiento[]
+
+  @@unique([deudaId, numeroCuota])
+  @@index([deudaId])
+  @@index([estado])
+  @@index([fechaVencimiento])
+}
+
+model Movimiento {
+  id                    String          @id @default(cuid())
+  deudaId               String
+  cuotaId               String?
+  tipo                  TipoMovimiento
+  monto                 Decimal         @db.Decimal(15, 2)
+  saldoAnterior         Decimal         @db.Decimal(15, 2)
+  saldoPosterior        Decimal         @db.Decimal(15, 2)
+  fecha                 DateTime        @default(now())
+  metodoPago            String?         @default("TRANSFERENCIA")
+  referenciaPago        String?
+  observaciones         String?         @db.Text
+  destinoAbono          DestinoAbono?   @default(REDUCIR_CAPITAL)
+  estaRevertido         Boolean         @default(false)
+  movimientoRevertidoId String?         @unique
+  createdAt             DateTime        @default(now())
+
+  deuda                 Deuda           @relation(fields: [deudaId], references: [id], onDelete: Cascade)
+  cuota                 Cuota?          @relation(fields: [cuotaId], references: [id], onDelete: SetNull)
+  movimientoOriginal    Movimiento?     @relation("Reversiones", fields: [movimientoRevertidoId], references: [id])
+  reversion             Movimiento?     @relation("Reversiones")
+
+  @@index([deudaId])
+  @@index([cuotaId])
+  @@index([fecha])
+  @@index([tipo])
+}
+
+model Configuracion {
+  id                    Int      @id @default(1)
+  moneda                String   @default("COP")
+  formatoFecha          String   @default("DD/MM/YYYY")
+  estrategiaPago        String   @default("BOLA_DE_NIEVE") // BOLA_DE_NIEVE, AVALANCHA, PERSONALIZADA
+  preferenciasDashboard String?  @db.Text
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+}
