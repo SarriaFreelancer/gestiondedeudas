@@ -12,21 +12,21 @@ export const AppShell: React.FC<{ children: React.ReactNode }> = ({ children }) 
 
   return (
     <div className="min-h-screen bg-[#070D1A] text-slate-100 flex flex-col justify-between">
-      {/* Sidebar Desktop y Drawer Móvil */}
+      {/* Sidebar Desktop fijo a la izquierda (oculto en móvil) */}
       <Sidebar
         isOpenMobile={isMobileOpen}
         onCloseMobile={() => setIsMobileOpen(false)}
       />
 
-      {/* Contenedor central alineado al estilo de la app */}
+      {/* Contenedor central adaptable */}
       <div className="flex-1 lg:pl-64 flex flex-col min-h-screen">
         <Header onToggleMobile={() => setIsMobileOpen(true)} />
 
-        <main className="flex-1 p-3.5 sm:p-6 max-w-xl sm:max-w-3xl lg:max-w-4xl w-full mx-auto pb-24">
+        <main className="flex-1 p-3.5 sm:p-6 lg:p-8 max-w-xl sm:max-w-3xl lg:max-w-5xl xl:max-w-6xl w-full mx-auto pb-24 lg:pb-8">
           {children}
         </main>
 
-        {/* Barra de navegación inferior móvil */}
+        {/* Barra de navegación inferior: ÚNICAMENTE visible en móviles (lg:hidden) */}
         <BottomNav />
       </div>
 

@@ -11,8 +11,10 @@ import {
   MoreHorizontal,
   CheckSquare,
   History,
+  PiggyBank,
   LogOut,
   X,
+  CreditCard,
 } from "lucide-react";
 import { useFinancial } from "@/context/FinancialContext";
 
@@ -32,13 +34,17 @@ export const BottomNav: React.FC = () => {
 
   return (
     <>
-      {/* MENÚ FLOTANTE "MÁS" */}
+      {/* MENÚ FLOTANTE "MÁS" EN MÓVIL */}
       {isMoreOpen && (
-        <div className="fixed inset-0 z-50 flex items-end justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <div className="w-full max-w-sm p-5 rounded-3xl bg-[#091122] border border-slate-700 shadow-2xl space-y-2 mb-20 animate-in slide-in-from-bottom duration-200">
+        <div className="lg:hidden fixed inset-0 z-50 flex items-end justify-center p-4 bg-black/75 backdrop-blur-sm animate-in fade-in duration-200">
+          <div
+            className="fixed inset-0"
+            onClick={() => setIsMoreOpen(false)}
+          />
+          <div className="relative w-full max-w-sm p-5 rounded-3xl bg-[#091122] border border-slate-700 shadow-2xl space-y-2 mb-20 z-10 animate-in slide-in-from-bottom duration-200">
             <div className="flex items-center justify-between pb-3 border-b border-slate-800">
-              <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
-                Opciones Adicionales
+              <span className="text-xs font-bold uppercase tracking-wider text-slate-300">
+                Módulos del Sistema
               </span>
               <button
                 onClick={() => setIsMoreOpen(false)}
@@ -56,7 +62,28 @@ export const BottomNav: React.FC = () => {
               <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-400">
                 <CheckSquare className="w-4 h-4" />
               </div>
-              <span>Cuotas & Checklist</span>
+              <div className="flex flex-col">
+                <span>Cuotas & Checklist</span>
+                <span className="text-[10px] text-slate-400 font-normal">
+                  Pagar cuotas de Nequi, Davivienda y Crédito 20 min
+                </span>
+              </div>
+            </Link>
+
+            <Link
+              href="/abonos"
+              onClick={() => setIsMoreOpen(false)}
+              className="flex items-center gap-3 p-3 rounded-2xl hover:bg-slate-800/60 text-slate-200 text-xs font-semibold transition-colors"
+            >
+              <div className="p-2 rounded-xl bg-blue-500/10 text-blue-400">
+                <PiggyBank className="w-4 h-4" />
+              </div>
+              <div className="flex flex-col">
+                <span>Registrar Abonos</span>
+                <span className="text-[10px] text-slate-400 font-normal">
+                  Abonos libres a Nu, Davibank y extraordinarios
+                </span>
+              </div>
             </Link>
 
             <Link
@@ -64,10 +91,15 @@ export const BottomNav: React.FC = () => {
               onClick={() => setIsMoreOpen(false)}
               className="flex items-center gap-3 p-3 rounded-2xl hover:bg-slate-800/60 text-slate-200 text-xs font-semibold transition-colors"
             >
-              <div className="p-2 rounded-xl bg-blue-500/10 text-blue-400">
+              <div className="p-2 rounded-xl bg-purple-500/10 text-purple-400">
                 <History className="w-4 h-4" />
               </div>
-              <span>Historial & Auditoría</span>
+              <div className="flex flex-col">
+                <span>Historial & Auditoría</span>
+                <span className="text-[10px] text-slate-400 font-normal">
+                  Exportar a Excel, PDF y reversiones
+                </span>
+              </div>
             </Link>
 
             <button
@@ -75,7 +107,7 @@ export const BottomNav: React.FC = () => {
                 setIsMoreOpen(false);
                 handleLogout();
               }}
-              className="w-full flex items-center gap-3 p-3 rounded-2xl hover:bg-red-500/10 text-red-400 text-xs font-semibold transition-colors"
+              className="w-full flex items-center gap-3 p-3 rounded-2xl hover:bg-red-500/10 text-red-400 text-xs font-semibold transition-colors pt-2 border-t border-slate-800/60"
             >
               <div className="p-2 rounded-xl bg-red-500/10 text-red-400">
                 <LogOut className="w-4 h-4" />
@@ -86,8 +118,8 @@ export const BottomNav: React.FC = () => {
         </div>
       )}
 
-      {/* BARRA DE NAVEGACIÓN INFERIOR FLOTANTE IDÉNTICA A LA IMAGEN */}
-      <nav className="fixed bottom-0 inset-x-0 z-40 bg-[#070D1A]/95 border-t border-slate-800/80 backdrop-blur-xl px-4 py-2 sm:py-2.5 max-w-lg mx-auto sm:rounded-t-3xl shadow-2xl">
+      {/* BARRA DE NAVEGACIÓN INFERIOR EXCLUSIVA PARA MÓVIL (lg:hidden) */}
+      <nav className="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-[#070D1A]/95 border-t border-slate-800/80 backdrop-blur-xl px-4 py-2 sm:py-2.5 max-w-lg mx-auto sm:rounded-t-3xl shadow-2xl">
         <div className="flex items-center justify-between relative px-2">
           {/* Botón 1: Inicio */}
           <Link
@@ -111,7 +143,7 @@ export const BottomNav: React.FC = () => {
             <span className="text-[10px] font-bold">Mis Deudas</span>
           </Link>
 
-          {/* Botón Central Flotante (+): Registrar Abono o Pago */}
+          {/* Botón Central Flotante (+): Abre Modal de Abono o Pago Inmediato */}
           <div className="relative -top-4 flex items-center justify-center">
             <button
               onClick={() => setIsAbonoModalOpen(true)}
