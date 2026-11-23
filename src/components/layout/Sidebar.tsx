@@ -12,6 +12,7 @@ import {
   LineChart,
   LogOut,
   ShieldCheck,
+  User,
 } from "lucide-react";
 import { BrandLogo } from "../ui/BrandLogo";
 
@@ -22,6 +23,7 @@ const NAV_ITEMS = [
   { href: "/abonos", label: "Registrar Abonos", icon: PiggyBank },
   { href: "/historial", label: "Historial Financiero", icon: History },
   { href: "/reportes", label: "Proyección & Reportes", icon: LineChart },
+  { href: "/perfil", label: "Perfil & Ajustes", icon: User },
 ];
 
 export const Sidebar: React.FC<{ isOpenMobile: boolean; onCloseMobile: () => void }> = ({
@@ -73,13 +75,20 @@ export const Sidebar: React.FC<{ isOpenMobile: boolean; onCloseMobile: () => voi
 
       {/* FOOTER & LOGOUT */}
       <div className="pt-4 border-t border-slate-800">
-        <div className="p-3 rounded-xl bg-slate-900/60 border border-slate-800 mb-3 text-xs text-slate-400">
-          <div className="flex items-center gap-1.5 font-semibold text-slate-200">
-            <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-            <span>David</span>
+        <Link
+          href="/perfil"
+          onClick={onCloseMobile}
+          className="block p-3 rounded-xl bg-slate-900/60 border border-slate-800 hover:border-slate-700 transition-colors mb-3 text-xs text-slate-400 group"
+        >
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-1.5 font-semibold text-slate-200 group-hover:text-blue-400 transition-colors">
+              <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+              <span>David (Administrador)</span>
+            </div>
+            <User className="w-3.5 h-3.5 text-slate-500 group-hover:text-blue-400" />
           </div>
-          <p className="text-[11px] text-slate-500 truncate mt-0.5">david@milibertadfinanciera.com</p>
-        </div>
+          <p className="text-[11px] text-slate-500 truncate mt-0.5">Configurar cuenta & App</p>
+        </Link>
 
         <button
           onClick={handleLogout}

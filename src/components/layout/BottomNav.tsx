@@ -14,7 +14,7 @@ import {
   PiggyBank,
   LogOut,
   X,
-  CreditCard,
+  User,
 } from "lucide-react";
 import { useFinancial } from "@/context/FinancialContext";
 
@@ -98,6 +98,22 @@ export const BottomNav: React.FC = () => {
                 <span>Historial & Auditoría</span>
                 <span className="text-[10px] text-slate-400 font-normal">
                   Exportar a Excel, PDF y reversiones
+                </span>
+              </div>
+            </Link>
+
+            <Link
+              href="/perfil"
+              onClick={() => setIsMoreOpen(false)}
+              className="flex items-center gap-3 p-3 rounded-2xl hover:bg-slate-800/60 text-slate-200 text-xs font-semibold transition-colors"
+            >
+              <div className="p-2 rounded-xl bg-cyan-500/10 text-cyan-400">
+                <User className="w-4 h-4" />
+              </div>
+              <div className="flex flex-col">
+                <span>Perfil & Ajustes (Instalar APK)</span>
+                <span className="text-[10px] text-slate-400 font-normal">
+                  Foto de perfil, contraseña e instalación en teléfono
                 </span>
               </div>
             </Link>
