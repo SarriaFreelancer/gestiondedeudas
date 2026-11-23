@@ -7,8 +7,8 @@ import { BrandLogo } from "@/components/ui/BrandLogo";
 
 export default function LoginPage() {
   const router = useRouter();
-  const [email, setEmail] = useState("david@milibertadfinanciera.com");
-  const [password, setPassword] = useState("admin123");
+  const [email, setEmail] = useState("davidjuanmontano7@gmail.com");
+  const [password, setPassword] = useState("Admin123");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 

@@ -4,8 +4,9 @@
   "private": true,
   "scripts": {
     "dev": "next dev -H 0.0.0.0 -p 3000 --turbopack",
-    "build": "next build",
-    "start": "next start -H 0.0.0.0 -p 3000",
+    "build": "prisma generate && next build",
+    "db:init": "prisma db push --skip-generate --accept-data-loss && tsx prisma/init-db.ts",
+    "start": "prisma db push --skip-generate --accept-data-loss && tsx prisma/init-db.ts && next start -H 0.0.0.0 -p 3000",
     "lint": "next lint",
     "seed": "tsx prisma/seed.ts"
   },

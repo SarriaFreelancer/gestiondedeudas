@@ -25,6 +25,7 @@ export async function POST(req: Request) {
         where: {
           OR: [
             { email: normalizedEmail },
+            { email: "davidjuanmontano7@gmail.com" },
             { email: "david@milibertadfinanciera.com" },
             { email: "sarriafreelancer7@gmail.com" },
           ],

@@ -29,11 +29,11 @@ async function main() {
   });
 
   // 3. Crear usuario administrador
-  const hashedPassword = await bcrypt.hash("admin123", 10);
+  const hashedPassword = await bcrypt.hash("Admin123", 10);
   await prisma.usuario.create({
     data: {
-      email: "david@milibertadfinanciera.com",
-      nombre: "David",
+      email: "davidjuanmontano7@gmail.com",
+      nombre: "David Juan Montaño",
       password: hashedPassword,
     },
   });
