@@ -1,0 +1,112 @@
+"use client";
+
+import React, { useState, useEffect } from "react";
+import { RotateCw } from "lucide-react";
+import { useFinancial } from "@/context/FinancialContext";
+
+export const MountainHero: React.FC = () => {
+  const { refreshData, loading } = useFinancial();
+  const [timeStr, setTimeStr] = useState("9:41 a.m.");
+
+  useEffect(() => {
+    const updateTime = () => {
+      const now = new Date();
+      setTimeStr(
+        now.toLocaleTimeString("es-CO", {
+          hour: "numeric",
+          minute: "2-digit",
+          hour12: true,
+        })
+      );
+    };
+    updateTime();
+  }, []);
+
+  return (
+    <div className="relative w-full overflow-hidden rounded-3xl bg-[#091122] border border-blue-900/30 mb-6 shadow-2xl">
+      {/* Fondo de cordillera de montañas con resplandor y flecha ascendente */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        {/* Glow azul celestial */}
+        <div className="absolute top-0 right-1/4 w-96 h-48 bg-blue-500/25 blur-3xl rounded-full" />
+        <div className="absolute top-2 right-10 w-44 h-44 bg-cyan-400/20 blur-2xl rounded-full" />
+
+        {/* SVG Silueta de Montañas con iluminación azul de fondo */}
+        <svg
+          viewBox="0 0 1000 320"
+          preserveAspectRatio="none"
+          className="absolute bottom-0 w-full h-full opacity-60"
+        >
+          {/* Montañas de fondo oscuras */}
+          <polygon
+            points="0,320 180,140 320,230 480,90 620,200 780,60 920,180 1000,100 1000,320"
+            fill="#0D1B36"
+          />
+
+          {/* Montañas intermedias con aristas azuladas */}
+          <polygon
+            points="0,320 120,180 250,260 420,130 550,220 740,80 860,190 1000,130 1000,320"
+            fill="#08142B"
+          />
+
+          {/* Montañas frontales */}
+          <polygon
+            points="0,320 80,240 200,280 340,190 500,270 680,140 820,240 960,160 1000,200 1000,320"
+            fill="#050C1B"
+          />
+
+          {/* Flecha ascendente brillante hacia la cima (idéntica a la imagen) */}
+          <g className="animate-pulse">
+            <line
+              x1="520"
+              y1="220"
+              x2="730"
+              y2="90"
+              stroke="#38BDF8"
+              strokeWidth="5"
+              strokeLinecap="round"
+              className="drop-shadow-[0_0_12px_rgba(56,189,248,0.9)]"
+            />
+            <polygon
+              points="730,75 750,95 725,102"
+              fill="#38BDF8"
+              className="drop-shadow-[0_0_15px_rgba(56,189,248,1)]"
+            />
+          </g>
+        </svg>
+
+        {/* Gradiente vertical para oscurecer la base */}
+        <div className="absolute inset-0 bg-gradient-to-t from-[#080E1A] via-transparent to-transparent" />
+      </div>
+
+      {/* Contenido en primer plano */}
+      <div className="relative z-10 p-5 sm:p-7 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <div className="flex items-center gap-2">
+            <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+              ¡Hola!
+            </h1>
+            <span className="text-2xl sm:text-3xl animate-bounce">💪</span>
+          </div>
+          <p className="text-xs sm:text-sm text-slate-300 font-medium mt-1">
+            Vamos por tu libertad financiera
+          </p>
+        </div>
+
+        {/* Pastilla "Actualizado hoy" idéntica a la foto */}
+        <button
+          onClick={() => refreshData()}
+          disabled={loading}
+          className="self-start sm:self-center flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-[#0B1E19]/80 border border-emerald-500/30 hover:border-emerald-500/60 shadow-lg shadow-emerald-950/40 backdrop-blur-md transition-all group"
+        >
+          <div className="p-1 rounded-full bg-emerald-500/20 text-emerald-400 group-hover:rotate-180 transition-transform duration-500">
+            <RotateCw className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`} />
+          </div>
+          <div className="flex flex-col text-left leading-none">
+            <span className="text-[10px] text-emerald-300 font-medium">Actualizado hoy</span>
+            <span className="text-[11px] text-emerald-400 font-bold mt-0.5">{timeStr}</span>
+          </div>
+        </button>
+      </div>
+    </div>
+  );
+};

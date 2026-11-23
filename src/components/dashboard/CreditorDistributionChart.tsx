@@ -1,9 +1,9 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 import { formatCOP, formatPercentage } from "@/lib/formatters";
-import { PieChart as PieIcon, Building2 } from "lucide-react";
+import { PieChart as PieIcon } from "lucide-react";
 
 interface CreditorDistributionProps {
   distribucion: {
@@ -18,138 +18,121 @@ interface CreditorDistributionProps {
   saldoPendienteTotal: number;
 }
 
+// Colores exactos a la imagen suministrada
+const ACCURATE_COLORS: Record<string, string> = {
+  NEQUI: "#8E44EC", // Morado brillante
+  DAVIVIENDA: "#FF6D00", // Naranja brillante
+  "CRÉDITO 20 MINUTOS": "#00B0FF", // Azul celeste / cian
+  NU: "#76FF03", // Verde lima neón
+  "TARJETA DE CRÉDITO DAVIBANK": "#536DFE", // Azul índigo
+  Davibank: "#536DFE",
+};
+
 export const CreditorDistributionChart: React.FC<CreditorDistributionProps> = ({
   distribucion,
   saldoPendienteTotal,
 }) => {
-  const [selectedEntity, setSelectedEntity] = useState<string | null>(null);
+  const [mounted, setMounted] = useState(false);
 
-  // Filtrar entidades que tienen saldo pendiente > 0 para el gráfico
-  const dataActiva = distribucion.filter((d) => d.saldoPendiente > 0);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
-  const entidadSeleccionada = distribucion.find((d) => d.entidad === selectedEntity) || dataActiva[0];
+  const dataAlineada = distribucion.map((d) => ({
+    ...d,
+    nombreVisual:
+      d.entidad === "TARJETA DE CRÉDITO DAVIBANK"
+        ? "Davibank"
+        : d.entidad === "CRÉDITO 20 MINUTOS"
+        ? "Crédito 20 Minutos"
+        : d.entidad,
+    colorAlineado: ACCURATE_COLORS[d.entidad] || d.color,
+  }));
+
+  const dataActiva = dataAlineada.filter((d) => d.saldoPendiente > 0);
 
   return (
-    <div className="w-full p-6 rounded-3xl bg-[#151F32] border border-slate-800 shadow-xl flex flex-col justify-between">
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-2">
-          <div className="p-2 rounded-lg bg-indigo-500/10 border border-indigo-500/20 text-indigo-400">
-            <PieIcon className="w-5 h-5" />
-          </div>
-          <div>
-            <h3 className="text-sm font-semibold uppercase tracking-wider text-slate-300">
-              Distribución por Acreedor
-            </h3>
-            <p className="text-xs text-slate-400">Participación en el saldo pendiente total</p>
-          </div>
+    <div className="w-full p-4 sm:p-6 rounded-3xl bg-[#091122]/90 border border-slate-800/80 shadow-2xl">
+      {/* Título idéntico a la imagen */}
+      <div className="flex items-center gap-2 mb-4">
+        <div className="text-blue-500">
+          <PieIcon className="w-5 h-5 fill-blue-500/20 text-blue-400" />
         </div>
+        <h3 className="text-sm sm:text-base font-bold text-white tracking-tight">
+          Distribución de tu deuda
+        </h3>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
-        {/* Gráfico Circular Recharts */}
-        <div className="h-60 w-full relative">
-          <ResponsiveContainer width="100%" height="100%">
-            <PieChart>
-              <Tooltip
-                formatter={(value: any, name: any) => [
-                  `${formatCOP(value)} (${(
-                    (Number(value) / (saldoPendienteTotal || 1)) *
-                    100
-                  ).toFixed(2)}%)`,
-                  name,
-                ]}
-                contentStyle={{
-                  backgroundColor: "#0B1120",
-                  borderColor: "#1E293B",
-                  borderRadius: "12px",
-                  color: "#F8FAFC",
-                }}
-              />
-              <Pie
-                data={dataActiva}
-                dataKey="saldoPendiente"
-                nameKey="entidad"
-                cx="50%"
-                cy="50%"
-                innerRadius={55}
-                outerRadius={85}
-                paddingAngle={3}
-                onClick={(entry: any) => setSelectedEntity(entry?.entidad || entry?.name || null)}
-                cursor="pointer"
-              >
-                {dataActiva.map((entry) => (
-                  <Cell
-                    key={entry.id}
-                    fill={entry.color}
-                    stroke={selectedEntity === entry.entidad ? "#ffffff" : "#151F32"}
-                    strokeWidth={selectedEntity === entry.entidad ? 3 : 1}
-                    className="transition-all duration-300"
-                  />
-                ))}
-              </Pie>
-            </PieChart>
-          </ResponsiveContainer>
+      <div className="flex flex-col md:flex-row items-center gap-6 justify-between">
+        {/* Mini Donut multicolor idéntico a la foto */}
+        <div className="relative w-44 h-44 flex-shrink-0 flex items-center justify-center mx-auto md:mx-0">
+          {mounted && (
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Tooltip
+                  formatter={(value: any, name: any) => [
+                    `${formatCOP(value)} (${(
+                      (Number(value) / (saldoPendienteTotal || 1)) *
+                      100
+                    ).toFixed(1)}%)`,
+                    name,
+                  ]}
+                  contentStyle={{
+                    backgroundColor: "#080E1A",
+                    borderColor: "#1E293B",
+                    borderRadius: "12px",
+                    color: "#F8FAFC",
+                    fontSize: "12px",
+                  }}
+                />
+                <Pie
+                  data={dataActiva}
+                  dataKey="saldoPendiente"
+                  nameKey="nombreVisual"
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={48}
+                  outerRadius={74}
+                  paddingAngle={2}
+                >
+                  {dataActiva.map((entry) => (
+                    <Cell key={entry.id} fill={entry.colorAlineado} stroke="#091122" strokeWidth={2} />
+                  ))}
+                </Pie>
+              </PieChart>
+            </ResponsiveContainer>
+          )}
         </div>
 
-        {/* Detalle interactivo al seleccionar */}
-        <div className="flex flex-col gap-2">
-          {entidadSeleccionada && (
-            <div className="p-4 rounded-2xl bg-slate-900/80 border border-slate-700/80 mb-2">
-              <div className="flex items-center justify-between mb-1">
-                <span className="text-xs font-bold text-slate-400 uppercase">
-                  Acreedor Seleccionado
-                </span>
+        {/* Tabla a la derecha con punto, Nombre, % y Monto idéntica a la imagen */}
+        <div className="w-full flex-1 space-y-2.5">
+          {dataAlineada.map((item) => (
+            <div
+              key={item.id}
+              className="flex items-center justify-between text-xs py-1 hover:bg-slate-800/30 px-2 rounded-lg transition-colors"
+            >
+              {/* Punto y Nombre */}
+              <div className="flex items-center gap-2.5 min-w-[130px]">
                 <span
-                  className="w-3 h-3 rounded-full"
-                  style={{ backgroundColor: entidadSeleccionada.color }}
+                  className="w-2.5 h-2.5 rounded-full flex-shrink-0 shadow-sm"
+                  style={{ backgroundColor: item.colorAlineado }}
                 />
-              </div>
-              <div className="text-lg font-extrabold text-white">
-                {entidadSeleccionada.entidad}
-              </div>
-              <div className="flex items-baseline justify-between mt-2">
-                <span className="text-xl font-bold text-slate-100">
-                  {formatCOP(entidadSeleccionada.saldoPendiente)}
-                </span>
-                <span className="text-xs font-semibold px-2 py-0.5 rounded bg-blue-500/20 text-blue-300 border border-blue-500/30">
-                  {formatPercentage(entidadSeleccionada.porcentajeSobreTotal)} del saldo
+                <span className="font-semibold text-white tracking-tight">
+                  {item.nombreVisual}
                 </span>
               </div>
-            </div>
-          )}
 
-          {/* Lista de acreedores */}
-          <div className="space-y-1.5 max-h-40 overflow-y-auto pr-1">
-            {distribucion.map((item) => (
-              <button
-                key={item.id}
-                onClick={() => setSelectedEntity(item.entidad)}
-                className={`w-full flex items-center justify-between p-2 rounded-xl text-xs transition-colors ${
-                  selectedEntity === item.entidad
-                    ? "bg-slate-800 border border-slate-600 text-white"
-                    : "hover:bg-slate-800/50 text-slate-300 border border-transparent"
-                }`}
-              >
-                <div className="flex items-center gap-2">
-                  <span
-                    className="w-2.5 h-2.5 rounded-full flex-shrink-0"
-                    style={{ backgroundColor: item.color }}
-                  />
-                  <span className="font-medium truncate max-w-[140px] text-left">
-                    {item.entidad}
-                  </span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <span className="font-semibold text-slate-200">
-                    {formatCOP(item.saldoPendiente)}
-                  </span>
-                  <span className="text-slate-400 w-12 text-right">
-                    {formatPercentage(item.porcentajeSobreTotal)}
-                  </span>
-                </div>
-              </button>
-            ))}
-          </div>
+              {/* Porcentaje */}
+              <span className="font-bold text-slate-300 w-12 text-right">
+                {formatPercentage(item.porcentajeSobreTotal, 1)}
+              </span>
+
+              {/* Saldo en pesos */}
+              <span className="font-mono font-bold text-white text-right w-24">
+                {formatCOP(item.saldoPendiente)}
+              </span>
+            </div>
+          ))}
         </div>
       </div>
     </div>
