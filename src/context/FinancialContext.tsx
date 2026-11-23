@@ -25,12 +25,22 @@ interface DeudaItem {
   movimientos: any[];
 }
 
+export interface UsuarioPerfil {
+  id: string;
+  nombre: string;
+  email: string;
+  avatar: string | null;
+  telefono: string | null;
+}
+
 interface FinancialContextType {
   summary: DashboardSummary | null;
   deudas: DeudaItem[];
+  usuario: UsuarioPerfil | null;
   loading: boolean;
   error: string | null;
   refreshData: () => Promise<void>;
+  refreshUsuario: () => Promise<void>;
   selectedDeudaForPayment: DeudaItem | null;
   setSelectedDeudaForPayment: (deuda: DeudaItem | null) => void;
   selectedCuotaForPayment: any | null;
@@ -48,6 +58,7 @@ const FinancialContext = createContext<FinancialContextType | undefined>(undefin
 export function FinancialProvider({ children }: { children: React.ReactNode }) {
   const [summary, setSummary] = useState<DashboardSummary | null>(null);
   const [deudas, setDeudas] = useState<DeudaItem[]>([]);
+  const [usuario, setUsuario] = useState<UsuarioPerfil | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -56,6 +67,18 @@ export function FinancialProvider({ children }: { children: React.ReactNode }) {
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState<boolean>(false);
   const [isAbonoModalOpen, setIsAbonoModalOpen] = useState<boolean>(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState<boolean>(false);
+
+  const refreshUsuario = useCallback(async () => {
+    try {
+      const res = await fetch("/api/usuario/perfil", { cache: "no-store" });
+      if (res.ok) {
+        const data = await res.json();
+        setUsuario(data);
+      }
+    } catch (e) {
+      console.error("Error al cargar perfil de usuario:", e);
+    }
+  }, []);
 
   const refreshData = useCallback(async () => {
     try {
@@ -84,16 +107,19 @@ export function FinancialProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     refreshData();
-  }, [refreshData]);
+    refreshUsuario();
+  }, [refreshData, refreshUsuario]);
 
   return (
     <FinancialContext.Provider
       value={{
         summary,
         deudas,
+        usuario,
         loading,
         error,
         refreshData,
+        refreshUsuario,
         selectedDeudaForPayment,
         setSelectedDeudaForPayment,
         selectedCuotaForPayment,

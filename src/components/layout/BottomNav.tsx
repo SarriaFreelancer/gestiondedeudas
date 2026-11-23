@@ -85,7 +85,7 @@ export const BottomNav: React.FC = () => {
               <ArrowRight className="w-4 h-4 text-slate-500 group-hover:text-blue-400 transition-colors" />
             </button>
 
-            {/* Opción 2: Ingresar Salario */}
+            {/* Opción 2: Ingresar / Editar Salario */}
             <button
               onClick={() => {
                 setIsQuickActionOpen(false);
@@ -99,7 +99,7 @@ export const BottomNav: React.FC = () => {
                 </div>
                 <div>
                   <span className="text-xs font-bold text-white block">
-                    Ingresar Salario Recibido
+                    Ingresar / Editar Salario
                   </span>
                   <span className="text-[10px] text-slate-400">
                     Registrar dinero de 1ª o 2ª quincena
@@ -157,17 +157,17 @@ export const BottomNav: React.FC = () => {
             </div>
 
             <Link
-              href="/presupuesto"
+              href="/reportes"
               onClick={() => setIsMoreOpen(false)}
               className="flex items-center gap-3 p-3 rounded-2xl hover:bg-slate-800/60 text-slate-200 text-xs font-semibold transition-colors"
             >
-              <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-400">
-                <Coins className="w-4 h-4" />
+              <div className="p-2 rounded-xl bg-blue-500/10 text-blue-400">
+                <BarChart2 className="w-4 h-4" />
               </div>
               <div className="flex flex-col">
-                <span>Presupuesto & Salario</span>
+                <span>Proyecciones & Reportes</span>
                 <span className="text-[10px] text-slate-400 font-normal">
-                  Control quincenal/mensual y gastos fijos/variables
+                  Gráficos avanzados, bola de nieve y proyecciones
                 </span>
               </div>
             </Link>
@@ -177,7 +177,7 @@ export const BottomNav: React.FC = () => {
               onClick={() => setIsMoreOpen(false)}
               className="flex items-center gap-3 p-3 rounded-2xl hover:bg-slate-800/60 text-slate-200 text-xs font-semibold transition-colors"
             >
-              <div className="p-2 rounded-xl bg-blue-500/10 text-blue-400">
+              <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-400">
                 <CheckSquare className="w-4 h-4" />
               </div>
               <div className="flex flex-col">
@@ -229,7 +229,7 @@ export const BottomNav: React.FC = () => {
                 <User className="w-4 h-4" />
               </div>
               <div className="flex flex-col">
-                <span>Perfil & Ajustes (Instalar APK)</span>
+                <span>Perfil & Ajustes (Editar Foto y Datos)</span>
                 <span className="text-[10px] text-slate-400 font-normal">
                   Foto de perfil, contraseña e instalación en teléfono
                 </span>
@@ -252,7 +252,7 @@ export const BottomNav: React.FC = () => {
         </div>
       )}
 
-      {/* BARRA DE NAVEGACIÓN INFERIOR EXCLUSIVA PARA MÓVIL (IDÉNTICA A LA IMAGEN DE REFERENCIA) */}
+      {/* BARRA DE NAVEGACIÓN INFERIOR CON SALARIO Y DEUDAS */}
       <nav className="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-[#070D1A]/95 border-t border-slate-800/80 backdrop-blur-xl px-4 py-2 sm:py-2.5 max-w-lg mx-auto sm:rounded-t-3xl shadow-2xl">
         <div className="flex items-center justify-between relative px-2">
           {/* Botón 1: Inicio */}
@@ -266,15 +266,15 @@ export const BottomNav: React.FC = () => {
             <span className="text-[10px] font-bold">Inicio</span>
           </Link>
 
-          {/* Botón 2: Mis Deudas */}
+          {/* Botón 2: Salario */}
           <Link
-            href="/deudas"
+            href="/presupuesto"
             className={`flex flex-col items-center gap-1 py-1 transition-colors ${
-              pathname === "/deudas" ? "text-[#2F80ED]" : "text-slate-400 hover:text-slate-200"
+              pathname === "/presupuesto" ? "text-emerald-400 font-bold" : "text-slate-400 hover:text-slate-200"
             }`}
           >
-            <Wallet className="w-5 h-5" />
-            <span className="text-[10px] font-bold">Mis Deudas</span>
+            <Coins className="w-5 h-5" />
+            <span className="text-[10px] font-bold">Salario</span>
           </Link>
 
           {/* Botón Central Flotante (+): Abre Acciones Rápidas */}
@@ -288,15 +288,15 @@ export const BottomNav: React.FC = () => {
             </button>
           </div>
 
-          {/* Botón 4: Reportes */}
+          {/* Botón 4: Deudas */}
           <Link
-            href="/reportes"
+            href="/deudas"
             className={`flex flex-col items-center gap-1 py-1 transition-colors ${
-              pathname === "/reportes" ? "text-[#2F80ED]" : "text-slate-400 hover:text-slate-200"
+              pathname === "/deudas" ? "text-[#2F80ED]" : "text-slate-400 hover:text-slate-200"
             }`}
           >
-            <BarChart2 className="w-5 h-5" />
-            <span className="text-[10px] font-bold">Reportes</span>
+            <Wallet className="w-5 h-5" />
+            <span className="text-[10px] font-bold">Deudas</span>
           </Link>
 
           {/* Botón 5: Más */}

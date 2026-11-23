@@ -1,12 +1,13 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { RotateCw, Menu } from "lucide-react";
+import Link from "next/link";
+import { RotateCw, Menu, User } from "lucide-react";
 import { useFinancial } from "@/context/FinancialContext";
 import { BrandLogo } from "../ui/BrandLogo";
 
 export const MountainHero: React.FC = () => {
-  const { refreshData, loading, setIsMobileMenuOpen } = useFinancial();
+  const { refreshData, loading, setIsMobileMenuOpen, usuario } = useFinancial();
   const [timeStr, setTimeStr] = useState("9:41 a.m.");
 
   useEffect(() => {
@@ -23,8 +24,11 @@ export const MountainHero: React.FC = () => {
     updateTime();
   }, []);
 
+  // Obtener primer nombre del usuario logueado (por ejemplo, "David")
+  const primerNombre = usuario?.nombre ? usuario.nombre.trim().split(" ")[0] : "David";
+
   return (
-    // Espacio superior elegante (mt-2 sm:mt-4) para bajar la imagen y despegarla del notch / borde del teléfono
+    // Espacio superior elegante (mt-2 sm:mt-4) para despegar la imagen del notch / borde del teléfono
     <div className="relative w-full overflow-hidden rounded-3xl bg-[#091122] border border-blue-900/30 mt-2 sm:mt-4 mb-4 sm:mb-6 shadow-2xl">
       {/* Fondo de cordillera de montañas con resplandor y flecha ascendente */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
@@ -56,7 +60,7 @@ export const MountainHero: React.FC = () => {
             fill="#050C1B"
           />
 
-          {/* Flecha ascendente brillante hacia la cima (idéntica a la imagen) */}
+          {/* Flecha ascendente brillante hacia la cima */}
           <g className="animate-pulse">
             <line
               x1="520"
@@ -82,27 +86,51 @@ export const MountainHero: React.FC = () => {
 
       {/* Contenido en primer plano */}
       <div className="relative z-10 p-4 sm:p-7 flex flex-col justify-between">
-        {/* FILA SUPERIOR IDÉNTICA A LA IMAGEN: Logo a la izquierda y Botón Menú Hamburguesa (≡) a la derecha */}
+        {/* FILA SUPERIOR: Logo a la izquierda, Foto de Perfil en circulito y Menú hamburguesa (≡) a la derecha */}
         <div className="flex items-center justify-between pb-3.5 mb-3 border-b border-blue-900/30">
           <BrandLogo />
 
-          {/* Botón de Menú lateral en móvil (≡) */}
-          <button
-            onClick={() => setIsMobileMenuOpen(true)}
-            className="lg:hidden p-2 rounded-xl bg-slate-900/70 border border-slate-700/60 text-slate-200 hover:text-white hover:bg-slate-800 transition-colors"
-            title="Abrir menú de navegación"
-            aria-label="Abrir menú"
-          >
-            <Menu className="w-5 h-5 stroke-[2.2]" />
-          </button>
+          <div className="flex items-center gap-2.5">
+            {/* Foto de Perfil en circulito con enlace para editar */}
+            <Link
+              href="/perfil"
+              className="relative group block"
+              title={`Perfil de ${usuario?.nombre || "Usuario"} (Clic para editar)`}
+            >
+              <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full overflow-hidden border-2 border-emerald-400 bg-slate-800 flex items-center justify-center shadow-md shadow-emerald-500/20 group-hover:scale-105 group-hover:border-emerald-300 transition-all">
+                {usuario?.avatar ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={usuario.avatar}
+                    alt={usuario.nombre}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <span className="text-xs font-black text-white">
+                    {(usuario?.nombre || "D").charAt(0).toUpperCase()}
+                  </span>
+                )}
+              </div>
+            </Link>
+
+            {/* Botón de Menú lateral en móvil (≡) */}
+            <button
+              onClick={() => setIsMobileMenuOpen(true)}
+              className="lg:hidden p-2 rounded-xl bg-slate-900/70 border border-slate-700/60 text-slate-200 hover:text-white hover:bg-slate-800 transition-colors"
+              title="Abrir menú de navegación"
+              aria-label="Abrir menú"
+            >
+              <Menu className="w-5 h-5 stroke-[2.2]" />
+            </button>
+          </div>
         </div>
 
-        {/* FILA INFERIOR: Saludo y Pastilla "Actualizado hoy" */}
+        {/* FILA INFERIOR: Saludo personalizado con el nombre del usuario y Pastilla "Actualizado hoy" */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
           <div>
             <div className="flex items-center gap-2">
               <h1 className="text-xl sm:text-3xl font-black text-white tracking-tight">
-                ¡Hola!
+                ¡Hola {primerNombre}!
               </h1>
               <span className="text-xl sm:text-3xl animate-bounce">💪</span>
             </div>

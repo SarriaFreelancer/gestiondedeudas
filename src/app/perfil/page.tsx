@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
+import { useFinancial } from "@/context/FinancialContext";
 import {
   User,
   Camera,
@@ -23,6 +24,7 @@ import {
 } from "lucide-react";
 
 export default function PerfilPage() {
+  const { refreshUsuario } = useFinancial();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Estados de datos de usuario
@@ -129,6 +131,7 @@ export default function PerfilPage() {
         throw new Error(data.error || "Error al actualizar perfil");
       }
 
+      await refreshUsuario();
       setSuccessPerfil("¡Perfil actualizado exitosamente!");
       setTimeout(() => setSuccessPerfil(null), 4000);
     } catch (err: any) {

@@ -19,6 +19,10 @@ interface BudgetContextType {
   setIsAddExpenseModalOpen: (open: boolean) => void;
   isAddIncomeModalOpen: boolean;
   setIsAddIncomeModalOpen: (open: boolean) => void;
+  isEditIncomeModalOpen: boolean;
+  setIsEditIncomeModalOpen: (open: boolean) => void;
+  selectedIncomeForEdit: any | null;
+  setSelectedIncomeForEdit: (ingreso: any | null) => void;
   isPayExpenseModalOpen: boolean;
   setIsPayExpenseModalOpen: (open: boolean) => void;
   selectedExpenseForPayment: any | null;
@@ -41,6 +45,8 @@ export const BudgetProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   // Modales
   const [isAddExpenseModalOpen, setIsAddExpenseModalOpen] = useState(false);
   const [isAddIncomeModalOpen, setIsAddIncomeModalOpen] = useState(false);
+  const [isEditIncomeModalOpen, setIsEditIncomeModalOpen] = useState(false);
+  const [selectedIncomeForEdit, setSelectedIncomeForEdit] = useState<any | null>(null);
   const [isPayExpenseModalOpen, setIsPayExpenseModalOpen] = useState(false);
   const [selectedExpenseForPayment, setSelectedExpenseForPayment] = useState<any | null>(null);
 
@@ -95,6 +101,10 @@ export const BudgetProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         setIsAddExpenseModalOpen,
         isAddIncomeModalOpen,
         setIsAddIncomeModalOpen,
+        isEditIncomeModalOpen,
+        setIsEditIncomeModalOpen,
+        selectedIncomeForEdit,
+        setSelectedIncomeForEdit,
         isPayExpenseModalOpen,
         setIsPayExpenseModalOpen,
         selectedExpenseForPayment,

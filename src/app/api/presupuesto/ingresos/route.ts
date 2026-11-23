@@ -50,6 +50,36 @@ export async function POST(req: Request) {
   }
 }
 
+// Editar salario existente
+export async function PUT(req: Request) {
+  try {
+    const body = await req.json();
+    const { id, descripcion, monto, periodo, fuente } = body;
+
+    if (!id || !monto) {
+      return NextResponse.json(
+        { error: "ID y monto de salario son requeridos para actualizar" },
+        { status: 400 }
+      );
+    }
+
+    const ingreso = await prisma.ingreso.update({
+      where: { id },
+      data: {
+        descripcion: descripcion ? descripcion.trim() : undefined,
+        monto: Number(monto),
+        periodo: periodo ? (periodo as PeriodoPresupuesto) : undefined,
+        fuente: fuente ? fuente.trim() : undefined,
+      },
+    });
+
+    return NextResponse.json({ success: true, ingreso });
+  } catch (error: any) {
+    console.error("Error al actualizar ingreso:", error);
+    return NextResponse.json({ error: error.message }, { status: 400 });
+  }
+}
+
 export async function DELETE(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
