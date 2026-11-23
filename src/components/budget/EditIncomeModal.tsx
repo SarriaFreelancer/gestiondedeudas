@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useBudget } from "@/context/BudgetContext";
 import { Coins, X, AlertCircle, Loader2, Save, Trash2 } from "lucide-react";
 import { formatCOP } from "@/lib/formatters";
+import { AppAlert } from "@/lib/alerts";
 
 export const EditIncomeModal: React.FC = () => {
   const {
@@ -60,6 +61,7 @@ export const EditIncomeModal: React.FC = () => {
       }
 
       await refreshBudgetData();
+      AppAlert.toast("Salario actualizado correctamente", "success");
       setIsEditIncomeModalOpen(false);
     } catch (err: any) {
       setErrorMessage(err.message || "Error al actualizar salario");
@@ -69,12 +71,23 @@ export const EditIncomeModal: React.FC = () => {
   };
 
   const handleDelete = async () => {
-    if (confirm(`¿Deseas eliminar el registro "${descripcion}"?`)) {
+    const confirmado = await AppAlert.confirm(
+      "¿Eliminar ingreso?",
+      `¿Deseas eliminar el registro "<b>${descripcion}</b>"? Esta acción no se puede deshacer.`,
+      {
+        confirmText: "Sí, eliminar",
+        cancelText: "Cancelar",
+        isDestructive: true,
+      }
+    );
+
+    if (confirmado) {
       setSubmitting(true);
       try {
         await fetch(`/api/presupuesto/ingresos?id=${selectedIncomeForEdit.id}`, {
           method: "DELETE",
         });
+        AppAlert.toast("Registro eliminado con éxito", "success");
         await refreshBudgetData();
         setIsEditIncomeModalOpen(false);
       } catch (e: any) {

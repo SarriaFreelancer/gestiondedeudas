@@ -60,9 +60,15 @@ export async function getBudgetSummary(
     whereIngreso.periodo = periodoFiltro as PeriodoPresupuesto;
   }
 
-  // Asegurar que el mes tenga sus ingresos y gastos inicializados
+  // Asegurar que el mes tenga sus ingresos inicializados si no existen
   let todosIngresosMes = await prisma.ingreso.findMany({ where: { mes, anio } });
-  let gastos = await prisma.gastoPresupuesto.findMany({
+  if (todosIngresosMes.length === 0) {
+    await ensureMonthlyBudgetInitialized(mes, anio);
+    todosIngresosMes = await prisma.ingreso.findMany({ where: { mes, anio } });
+  }
+
+  // Los gastos SOLO los crea el usuario manualmente. Nunca se autogeneran ni se siembran por defecto.
+  const gastos = await prisma.gastoPresupuesto.findMany({
     where: {
       mes,
       anio,
@@ -76,25 +82,6 @@ export async function getBudgetSummary(
         : {}),
     },
   });
-
-  if (todosIngresosMes.length === 0 || gastos.length === 0) {
-    await ensureMonthlyBudgetInitialized(mes, anio);
-    todosIngresosMes = await prisma.ingreso.findMany({ where: { mes, anio } });
-    gastos = await prisma.gastoPresupuesto.findMany({
-      where: {
-        mes,
-        anio,
-        ...(periodoFiltro !== "MES_COMPLETO"
-          ? {
-              OR: [
-                { periodoAsignado: periodoFiltro as PeriodoPresupuesto },
-                { periodoAsignado: PeriodoPresupuesto.MES_COMPLETO },
-              ],
-            }
-          : {}),
-      },
-    });
-  }
 
   // Cálculos de Ingresos
   let totalIngresos = 0;
@@ -214,8 +201,8 @@ export async function getBudgetSummary(
 }
 
 /**
- * Asegura que el mes especificado tenga sus salarios fijos continuos
- * y sus gastos fijos recurrentes arrastrados del mes anterior.
+ * Asegura que el mes especificado tenga sus salarios fijos continuos si no existen.
+ * Los gastos NUNCA se generan por defecto; el usuario los crea manualmente uno a uno.
  */
 export async function ensureMonthlyBudgetInitialized(mes: number, anio: number) {
   // 1. Revisar Ingresos
@@ -253,7 +240,7 @@ export async function ensureMonthlyBudgetInitialized(mes: number, anio: number) 
         });
       }
     } else {
-      // Si no hay ninguno previo en la base de datos, sembrar plantilla base
+      // Si no hay ninguno previo en la base de datos, sembrar salario base
       await prisma.ingreso.createMany({
         data: [
           {
@@ -276,187 +263,9 @@ export async function ensureMonthlyBudgetInitialized(mes: number, anio: number) 
       });
     }
   }
-
-  // 2. Revisar Gastos
-  const countGastos = await prisma.gastoPresupuesto.count({ where: { mes, anio } });
-  if (countGastos === 0) {
-    // Buscar los últimos gastos de un mes anterior
-    const ultimosGastos = await prisma.gastoPresupuesto.findMany({
-      where: {
-        OR: [
-          { anio: { lt: anio } },
-          { anio: anio, mes: { lt: mes } },
-        ],
-      },
-      orderBy: [{ anio: "desc" }, { mes: "desc" }, { createdAt: "desc" }],
-      take: 20,
-    });
-
-    if (ultimosGastos.length > 0) {
-      const ultMes = ultimosGastos[0].mes;
-      const ultAnio = ultimosGastos[0].anio;
-      const gastosFuente = await prisma.gastoPresupuesto.findMany({
-        where: { mes: ultMes, anio: ultAnio },
-      });
-
-      if (gastosFuente.length > 0) {
-        await prisma.gastoPresupuesto.createMany({
-          data: gastosFuente.map((g) => ({
-            nombre: g.nombre,
-            categoria: g.categoria,
-            tipo: g.tipo,
-            montoPresupuestado: g.montoPresupuestado,
-            montoReal: 0,
-            periodoAsignado: g.periodoAsignado,
-            diaVencimiento: g.diaVencimiento,
-            estaPagado: false,
-            fechaPago: null,
-            notas: g.notas,
-            mes,
-            anio,
-          })),
-        });
-      }
-    } else {
-      await seedDefaultMonthlyBudget(mes, anio);
-    }
-  }
-}
-
-// Plantilla inicial para el usuario (Alquiler, Plan de Datos, Servicios, etc.)
-export async function seedDefaultMonthlyBudget(mes: number, anio: number) {
-  const existingIng = await prisma.ingreso.count({ where: { mes, anio } });
-  if (existingIng === 0) {
-    await prisma.ingreso.createMany({
-      data: [
-        {
-          descripcion: "Salario 1ra Quincena",
-          monto: 2500000,
-          periodo: PeriodoPresupuesto.QUINCENA_1,
-          mes,
-          anio,
-          fuente: "SALARIO",
-        },
-        {
-          descripcion: "Salario 2da Quincena",
-          monto: 2500000,
-          periodo: PeriodoPresupuesto.QUINCENA_2,
-          mes,
-          anio,
-          fuente: "SALARIO",
-        },
-      ],
-    });
-  }
-
-  // Gastos fijos y variables base colombianos
-  const existingGastos = await prisma.gastoPresupuesto.count({ where: { mes, anio } });
-  if (existingGastos === 0) {
-    await prisma.gastoPresupuesto.createMany({
-      data: [
-        {
-          nombre: "Alquiler / Arriendo Vivienda",
-          categoria: CategoriaGasto.VIVIENDA,
-          tipo: TipoGasto.FIJO,
-          montoPresupuestado: 1200000,
-          montoReal: 0,
-          periodoAsignado: PeriodoPresupuesto.QUINCENA_1,
-          diaVencimiento: 5,
-          estaPagado: false,
-          mes,
-          anio,
-        },
-        {
-          nombre: "Plan de Datos Móvil & Telefonía",
-          categoria: CategoriaGasto.CONECTIVIDAD,
-          tipo: TipoGasto.FIJO,
-          montoPresupuestado: 65000,
-          montoReal: 0,
-          periodoAsignado: PeriodoPresupuesto.QUINCENA_1,
-          diaVencimiento: 10,
-          estaPagado: false,
-          mes,
-          anio,
-        },
-        {
-          nombre: "Internet Hogar Fibra Óptica",
-          categoria: CategoriaGasto.CONECTIVIDAD,
-          tipo: TipoGasto.FIJO,
-          montoPresupuestado: 95000,
-          montoReal: 0,
-          periodoAsignado: PeriodoPresupuesto.QUINCENA_2,
-          diaVencimiento: 18,
-          estaPagado: false,
-          mes,
-          anio,
-        },
-        {
-          nombre: "Factura de Energía / Luz",
-          categoria: CategoriaGasto.SERVICIOS_PUBLICOS,
-          tipo: TipoGasto.VARIABLE,
-          montoPresupuestado: 140000,
-          montoReal: 0,
-          periodoAsignado: PeriodoPresupuesto.QUINCENA_1,
-          diaVencimiento: 12,
-          estaPagado: false,
-          mes,
-          anio,
-        },
-        {
-          nombre: "Factura de Agua & Aseo",
-          categoria: CategoriaGasto.SERVICIOS_PUBLICOS,
-          tipo: TipoGasto.VARIABLE,
-          montoPresupuestado: 95000,
-          montoReal: 0,
-          periodoAsignado: PeriodoPresupuesto.QUINCENA_2,
-          diaVencimiento: 20,
-          estaPagado: false,
-          mes,
-          anio,
-        },
-        {
-          nombre: "Gas Natural Domiciliario",
-          categoria: CategoriaGasto.SERVICIOS_PUBLICOS,
-          tipo: TipoGasto.VARIABLE,
-          montoPresupuestado: 35000,
-          montoReal: 0,
-          periodoAsignado: PeriodoPresupuesto.QUINCENA_1,
-          diaVencimiento: 14,
-          estaPagado: false,
-          mes,
-          anio,
-        },
-        {
-          nombre: "Mercado & Alimentación Quincena 1",
-          categoria: CategoriaGasto.ALIMENTACION,
-          tipo: TipoGasto.VARIABLE,
-          montoPresupuestado: 450000,
-          montoReal: 0,
-          periodoAsignado: PeriodoPresupuesto.QUINCENA_1,
-          diaVencimiento: 3,
-          estaPagado: false,
-          mes,
-          anio,
-        },
-        {
-          nombre: "Mercado & Alimentación Quincena 2",
-          categoria: CategoriaGasto.ALIMENTACION,
-          tipo: TipoGasto.VARIABLE,
-          montoPresupuestado: 450000,
-          montoReal: 0,
-          periodoAsignado: PeriodoPresupuesto.QUINCENA_2,
-          diaVencimiento: 18,
-          estaPagado: false,
-          mes,
-          anio,
-        },
-      ],
-    });
-  }
 }
 
 export async function getGastosList(mes: number, anio: number, periodo?: string) {
-  await ensureMonthlyBudgetInitialized(mes, anio);
   const where: any = { mes, anio };
   if (periodo && periodo !== "MES_COMPLETO") {
     where.OR = [

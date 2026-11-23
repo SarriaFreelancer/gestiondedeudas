@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { useBudget } from "@/context/BudgetContext";
 import { CheckCircle2, X, AlertCircle, Loader2, Camera, FileCheck, ArrowRight } from "lucide-react";
 import { formatCOP } from "@/lib/formatters";
+import { AppAlert } from "@/lib/alerts";
 
 export const PayExpenseModal: React.FC = () => {
   const {
@@ -73,6 +74,7 @@ export const PayExpenseModal: React.FC = () => {
       }
 
       await refreshBudgetData();
+      AppAlert.toast(`Gasto "${selectedExpenseForPayment.nombre}" pagado exitosamente`, "success");
       setIsPayExpenseModalOpen(false);
     } catch (err: any) {
       setErrorMessage(err.message || "No se pudo registrar el pago");

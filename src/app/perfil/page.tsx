@@ -22,6 +22,7 @@ import {
   ExternalLink,
   Sparkles,
 } from "lucide-react";
+import { AppAlert } from "@/lib/alerts";
 
 export default function PerfilPage() {
   const { refreshUsuario } = useFinancial();
@@ -197,8 +198,12 @@ export default function PerfilPage() {
       }
       setDeferredPrompt(null);
     } else {
-      alert(
-        "Para instalar en tu teléfono:\n\n1. En Android (Chrome): Pulsa los 3 puntos superiores y selecciona 'Instalar aplicación' o 'Agregar a pantalla principal'.\n2. En iPhone (Safari): Pulsa el botón Compartir y selecciona 'Agregar al inicio'."
+      AppAlert.warning(
+        "Instalación en tu teléfono",
+        `<div class="text-left space-y-2 mt-2">
+          <p><b>1. En Android (Chrome):</b> Pulsa los 3 puntos superiores ⋮ y selecciona <i>'Instalar aplicación'</i> o <i>'Agregar a pantalla principal'</i>.</p>
+          <p><b>2. En iPhone (Safari):</b> Pulsa el botón Compartir ⎋ y selecciona <i>'Agregar al inicio'</i>.</p>
+        </div>`
       );
     }
   };

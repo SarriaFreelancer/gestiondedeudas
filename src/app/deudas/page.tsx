@@ -17,6 +17,7 @@ import {
 import Link from "next/link";
 import { CreateDebtModal } from "@/components/debts/CreateDebtModal";
 import { EditDebtModal } from "@/components/debts/EditDebtModal";
+import { AppAlert } from "@/lib/alerts";
 
 export default function DeudasPage() {
   const { deudas, refreshData, setSelectedDeudaForPayment, setIsAbonoModalOpen } = useFinancial();
@@ -25,7 +26,17 @@ export default function DeudasPage() {
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const handleDeleteDebt = async (id: string, entidad: string) => {
-    if (!confirm(`¿Estás seguro de que deseas eliminar la deuda '${entidad}'? Esta acción no se puede deshacer.`)) {
+    const confirmado = await AppAlert.confirm(
+      "¿Eliminar deuda?",
+      `¿Estás seguro de que deseas eliminar la deuda de <b>${entidad}</b>? Esta acción borrará sus cuotas y no se puede deshacer.`,
+      {
+        confirmText: "Sí, eliminar deuda",
+        cancelText: "Cancelar",
+        isDestructive: true,
+      }
+    );
+
+    if (!confirmado) {
       return;
     }
 
@@ -34,12 +45,13 @@ export default function DeudasPage() {
       const res = await fetch(`/api/deudas/${id}`, { method: "DELETE" });
       const data = await res.json();
       if (!res.ok) {
-        alert(data.error || "No se pudo eliminar la deuda");
+        AppAlert.error("Error al eliminar", data.error || "No se pudo eliminar la deuda");
       } else {
+        AppAlert.toast(`Deuda "${entidad}" eliminada con éxito`, "success");
         await refreshData();
       }
     } catch (e: any) {
-      alert(e.message || "Error al eliminar");
+      AppAlert.error("Error inesperado", e.message || "Error al eliminar la deuda");
     } finally {
       setDeletingId(null);
     }

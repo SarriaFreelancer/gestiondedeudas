@@ -11,7 +11,9 @@ import {
   Camera,
   Layers,
   Sparkles,
+  PlusCircle,
 } from "lucide-react";
+import { AppAlert } from "@/lib/alerts";
 
 export const ExpenseChecklist: React.FC = () => {
   const {
@@ -19,27 +21,51 @@ export const ExpenseChecklist: React.FC = () => {
     refreshBudgetData,
     setSelectedExpenseForPayment,
     setIsPayExpenseModalOpen,
+    setIsAddExpenseModalOpen,
   } = useBudget();
 
-  const handleTogglePagar = (gasto: any) => {
+  const handleTogglePagar = async (gasto: any) => {
     if (!gasto.estaPagado) {
       setSelectedExpenseForPayment(gasto);
       setIsPayExpenseModalOpen(true);
     } else {
       // Revertir a no pagado
-      if (confirm(`¿Marcar "${gasto.nombre}" como pendiente nuevamente?`)) {
-        fetch("/api/presupuesto/gastos", {
+      const confirmado = await AppAlert.confirm(
+        "¿Revertir estado a pendiente?",
+        `¿Deseas marcar "<b>${gasto.nombre}</b>" como pendiente nuevamente? Se devolverá este saldo al disponible.`,
+        {
+          confirmText: "Sí, revertir",
+          cancelText: "Mantener pagado",
+          isDestructive: false,
+        }
+      );
+
+      if (confirmado) {
+        await fetch("/api/presupuesto/gastos", {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ id: gasto.id, estaPagado: false, montoReal: 0 }),
-        }).then(() => refreshBudgetData());
+        });
+        AppAlert.toast(`"${gasto.nombre}" marcado como pendiente`, "info");
+        await refreshBudgetData();
       }
     }
   };
 
   const handleDeleteGasto = async (id: string, nombre: string) => {
-    if (confirm(`¿Seguro que deseas eliminar el gasto "${nombre}"?`)) {
+    const confirmado = await AppAlert.confirm(
+      "¿Eliminar este gasto?",
+      `¿Estás seguro de que deseas eliminar "<b>${nombre}</b>"? Esta acción no se puede deshacer.`,
+      {
+        confirmText: "Sí, eliminar",
+        cancelText: "Cancelar",
+        isDestructive: true,
+      }
+    );
+
+    if (confirmado) {
       await fetch(`/api/presupuesto/gastos?id=${id}`, { method: "DELETE" });
+      AppAlert.toast(`Gasto "${nombre}" eliminado`, "success");
       await refreshBudgetData();
     }
   };
@@ -170,9 +196,24 @@ export const ExpenseChecklist: React.FC = () => {
         })}
 
         {gastos.length === 0 && (
-          <div className="p-8 text-center text-slate-400 text-xs">
-            No tienes gastos registrados para este periodo. Pulsa &quot;Nuevo Gasto&quot; para agregar
-            arriendo, servicios o telefonía.
+          <div className="p-8 sm:p-10 text-center rounded-2xl bg-slate-900/50 border border-slate-800 space-y-3">
+            <div className="w-12 h-12 rounded-2xl bg-blue-500/10 border border-blue-500/20 text-blue-400 mx-auto flex items-center justify-center">
+              <Layers className="w-6 h-6" />
+            </div>
+            <div>
+              <p className="text-sm font-bold text-white">No tienes gastos creados en este periodo</p>
+              <p className="text-xs text-slate-400 max-w-sm mx-auto mt-1">
+                Puedes agregar manualmente tu alquiler, plan de datos, servicios o cualquier gasto que necesites controlar.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setIsAddExpenseModalOpen(true)}
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white text-xs font-bold transition-all shadow-lg shadow-blue-500/20"
+            >
+              <PlusCircle className="w-4 h-4" />
+              <span>Agregar Mi Primer Gasto</span>
+            </button>
           </div>
         )}
       </div>

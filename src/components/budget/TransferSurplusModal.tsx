@@ -14,6 +14,7 @@ import {
   ArrowRight,
   Sparkles,
 } from "lucide-react";
+import { AppAlert } from "@/lib/alerts";
 
 export const TransferSurplusModal: React.FC = () => {
   const {
@@ -81,6 +82,7 @@ export const TransferSurplusModal: React.FC = () => {
       }
 
       setSuccess(true);
+      AppAlert.toast(`¡Traslado de ${formatCOP(monto)} a la meta exitoso!`, "success");
       await Promise.all([refreshBudgetData(), refreshMetas()]);
       setTimeout(() => {
         setSuccess(false);

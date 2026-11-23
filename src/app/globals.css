@@ -68,3 +68,20 @@ body {
 .animate-pulse-subtle {
   animation: pulseSubtle 3s ease-in-out infinite;
 }
+
+/* SweetAlert2 Nocturno Personalizado */
+.swal2-container {
+  z-index: 99999 !important;
+}
+
+.swal2-backdrop-show {
+  background: rgba(5, 9, 20, 0.75) !important;
+  backdrop-filter: blur(8px) !important;
+}
+
+.swal2-popup.rounded-3xl {
+  background: #091122 !important;
+  border: 1px solid rgba(30, 58, 138, 0.45) !important;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7) !important;
+}
+

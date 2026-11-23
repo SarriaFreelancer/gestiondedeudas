@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { useBudget } from "@/context/BudgetContext";
 import { Wallet, X, AlertCircle, Loader2, ArrowRight, Calendar, Briefcase } from "lucide-react";
+import { AppAlert } from "@/lib/alerts";
 import { formatCOP } from "@/lib/formatters";
 
 export const AddIncomeModal: React.FC = () => {
@@ -76,6 +77,7 @@ export const AddIncomeModal: React.FC = () => {
       }
 
       await refreshBudgetData();
+      AppAlert.toast("Ingreso registrado con éxito", "success");
       setIsAddIncomeModalOpen(false);
     } catch (err: any) {
       setErrorMessage(err.message || "Error al registrar ingreso");

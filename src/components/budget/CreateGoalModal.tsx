@@ -13,6 +13,7 @@ import {
   DollarSign,
   Palette,
 } from "lucide-react";
+import { AppAlert } from "@/lib/alerts";
 
 export const CreateGoalModal: React.FC = () => {
   const { isCreateGoalModalOpen, setIsCreateGoalModalOpen, refreshMetas } = useBudget();
@@ -64,6 +65,7 @@ export const CreateGoalModal: React.FC = () => {
       }
 
       await refreshMetas();
+      AppAlert.toast(`Meta "${nombre}" creada con éxito`, "success");
       setIsCreateGoalModalOpen(false);
     } catch (err: any) {
       setErrorMessage(err.message || "Error al crear la meta");

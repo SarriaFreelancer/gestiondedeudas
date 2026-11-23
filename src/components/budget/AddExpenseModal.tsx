@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { useBudget } from "@/context/BudgetContext";
 import { PlusCircle, X, AlertCircle, Loader2, ArrowRight } from "lucide-react";
 import { CategoriaGasto, TipoGasto, PeriodoPresupuesto } from "@prisma/client";
+import { AppAlert } from "@/lib/alerts";
 
 export const AddExpenseModal: React.FC = () => {
   const { isAddExpenseModalOpen, setIsAddExpenseModalOpen, mes, anio, refreshBudgetData } =
@@ -49,6 +50,7 @@ export const AddExpenseModal: React.FC = () => {
       }
 
       await refreshBudgetData();
+      AppAlert.toast(`Gasto "${nombre}" agregado con éxito`, "success");
       setIsAddExpenseModalOpen(false);
       setNombre("");
       setNotas("");
