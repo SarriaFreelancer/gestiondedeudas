@@ -34,6 +34,29 @@ enum DestinoAbono {
   ADELANTAR_CUOTAS
 }
 
+enum PeriodoPresupuesto {
+  QUINCENA_1
+  QUINCENA_2
+  MES_COMPLETO
+}
+
+enum TipoGasto {
+  FIJO
+  VARIABLE
+}
+
+enum CategoriaGasto {
+  VIVIENDA
+  SERVICIOS_PUBLICOS
+  CONECTIVIDAD
+  ALIMENTACION
+  TRANSPORTE
+  SALUD
+  EDUCACION
+  ENTRETENIMIENTO
+  OTROS
+}
+
 model Usuario {
   id        String   @id @default(cuid())
   email     String   @unique
@@ -128,8 +151,53 @@ model Configuracion {
   id                    Int      @id @default(1)
   moneda                String   @default("COP")
   formatoFecha          String   @default("DD/MM/YYYY")
-  estrategiaPago        String   @default("BOLA_DE_NIEVE") // BOLA_DE_NIEVE, AVALANCHA, PERSONALIZADA
+  estrategiaPago        String   @default("BOLA_DE_NIEVE")
   preferenciasDashboard String?  @db.Text
   createdAt             DateTime @default(now())
   updatedAt             DateTime @updatedAt
+}
+
+// ==========================================
+// MÓDULO 2: PRESUPUESTO & FLUJO DE CAJA MENSUAL / QUINCENAL
+// ==========================================
+
+model Ingreso {
+  id          String             @id @default(cuid())
+  descripcion String
+  monto       Decimal            @db.Decimal(15, 2)
+  periodo     PeriodoPresupuesto @default(QUINCENA_1)
+  mes         Int                // 1 a 12
+  anio        Int                // Ej: 2026
+  fecha       DateTime           @default(now())
+  fuente      String?            @default("SALARIO") // SALARIO, HONORARIOS, PRIMA, OTROS
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+
+  @@index([mes, anio])
+  @@index([periodo])
+}
+
+model GastoPresupuesto {
+  id                 String             @id @default(cuid())
+  nombre             String             // Ej: Alquiler, Plan Móvil, Luz, Agua, etc.
+  categoria          CategoriaGasto     @default(OTROS)
+  tipo               TipoGasto          @default(FIJO) // FIJO o VARIABLE
+  montoPresupuestado Decimal            @db.Decimal(15, 2)
+  montoReal          Decimal            @default(0) @db.Decimal(15, 2)
+  periodoAsignado    PeriodoPresupuesto @default(MES_COMPLETO)
+  diaVencimiento     Int?               @default(15)
+  estaPagado         Boolean            @default(false)
+  fechaPago          DateTime?
+  comprobanteUrl     String?            @db.LongText
+  notas              String?            @db.Text
+  mes                Int                // 1 a 12
+  anio               Int                // Ej: 2026
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+
+  @@index([mes, anio])
+  @@index([periodoAsignado])
+  @@index([categoria])
+  @@index([tipo])
+  @@index([estaPagado])
 }

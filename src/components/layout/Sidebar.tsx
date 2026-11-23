@@ -13,11 +13,13 @@ import {
   LogOut,
   ShieldCheck,
   User,
+  Coins,
 } from "lucide-react";
 import { BrandLogo } from "../ui/BrandLogo";
 
 const NAV_ITEMS = [
-  { href: "/", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/", label: "Dashboard Deudas", icon: LayoutDashboard },
+  { href: "/presupuesto", label: "Presupuesto & Salario", icon: Coins },
   { href: "/deudas", label: "Gestión de Deudas", icon: WalletCards },
   { href: "/cuotas", label: "Cuotas & Checklist", icon: CheckSquare },
   { href: "/abonos", label: "Registrar Abonos", icon: PiggyBank },
@@ -41,7 +43,7 @@ export const Sidebar: React.FC<{ isOpenMobile: boolean; onCloseMobile: () => voi
     }
   };
 
-  const navContent = (
+  return (
     <div className="flex flex-col h-full justify-between p-5">
       <div>
         {/* LOGO DE MONTAÑA OFICIAL */}
@@ -99,27 +101,5 @@ export const Sidebar: React.FC<{ isOpenMobile: boolean; onCloseMobile: () => voi
         </button>
       </div>
     </div>
-  );
-
-  return (
-    <>
-      {/* Sidebar Desktop fijo */}
-      <aside className="hidden lg:flex flex-col w-64 bg-[#091122] border-r border-slate-800/80 fixed inset-y-0 left-0 z-40">
-        {navContent}
-      </aside>
-
-      {/* Drawer Móvil */}
-      {isOpenMobile && (
-        <div className="lg:hidden fixed inset-0 z-50 flex">
-          <div
-            className="fixed inset-0 bg-black/70 backdrop-blur-sm"
-            onClick={onCloseMobile}
-          />
-          <div className="relative flex flex-col w-72 max-w-[80%] bg-[#091122] border-r border-slate-800 z-50 animate-in slide-in-from-left duration-200">
-            {navContent}
-          </div>
-        </div>
-      )}
-    </>
   );
 };

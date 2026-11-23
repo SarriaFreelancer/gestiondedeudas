@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { FinancialProvider } from "@/context/FinancialContext";
+import { BudgetProvider } from "@/context/BudgetContext";
 import { AppShell } from "@/components/layout/AppShell";
 
 const geistSans = Geist({
@@ -23,8 +24,8 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: "Mi Libertad Financiera — Sistema Personal de Gestión de Deudas",
-  description: "Control, organización, tranquilidad y progreso económico hacia la cancelación total de obligaciones.",
+  title: "Mi Libertad Financiera — Sistema Personal de Gestión de Deudas & Presupuesto",
+  description: "Control, organización, tranquilidad y progreso económico hacia la cancelación total de obligaciones y flujo de caja.",
   applicationName: "Mi Libertad Financiera",
   appleWebApp: {
     capable: true,
@@ -47,7 +48,9 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-[#070D1A] text-slate-100 min-h-screen selection:bg-blue-600 selection:text-white`}
       >
         <FinancialProvider>
-          <AppShell>{children}</AppShell>
+          <BudgetProvider>
+            <AppShell>{children}</AppShell>
+          </BudgetProvider>
         </FinancialProvider>
       </body>
     </html>
