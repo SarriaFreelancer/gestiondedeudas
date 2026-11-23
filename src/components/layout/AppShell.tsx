@@ -19,7 +19,7 @@ export const AppShell: React.FC<{ children: React.ReactNode }> = ({ children }) 
   }
 
   return (
-    <div className="min-h-screen bg-[#070D1A] text-slate-100 flex flex-col justify-between overflow-x-hidden">
+    <div className="min-h-screen bg-[#070D1A] text-slate-100 flex flex-col justify-between">
       {/* Sidebar Desktop fijo a la izquierda (en móvil y tablet abre como drawer overlay si isMobileMenuOpen es true) */}
       <Sidebar
         isOpenMobile={isMobileMenuOpen}
