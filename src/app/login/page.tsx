@@ -29,8 +29,7 @@ export default function LoginPage() {
         throw new Error(data.error || "Error al autenticar");
       }
 
-      router.push("/");
-      router.refresh();
+      window.location.href = "/";
     } catch (err: any) {
       setError(err.message || "Credenciales incorrectas");
     } finally {

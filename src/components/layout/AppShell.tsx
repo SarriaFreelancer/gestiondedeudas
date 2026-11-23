@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { usePathname } from "next/navigation";
 import { Sidebar } from "./Sidebar";
 import { Header } from "./Header";
 import { BottomNav } from "./BottomNav";
@@ -9,6 +10,12 @@ import { AbonoModal } from "../payments/AbonoModal";
 
 export const AppShell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isMobileOpen, setIsMobileOpen] = useState(false);
+  const pathname = usePathname();
+
+  // Si estamos en la página de Login, renderizar 100% limpia afuera del dashboard (sin Sidebar, Header ni BottomNav)
+  if (pathname === "/login") {
+    return <div className="min-h-screen w-full bg-[#070D1A]">{children}</div>;
+  }
 
   return (
     <div className="min-h-screen bg-[#070D1A] text-slate-100 flex flex-col justify-between">

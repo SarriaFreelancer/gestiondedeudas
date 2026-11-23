@@ -33,9 +33,10 @@ export const BottomNav: React.FC = () => {
   const handleLogout = async () => {
     try {
       await fetch("/api/auth/logout", { method: "POST" });
-      window.location.href = "/login";
     } catch (e) {
       console.error(e);
+    } finally {
+      window.location.href = "/login";
     }
   };
 

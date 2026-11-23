@@ -48,9 +48,10 @@ export const Sidebar: React.FC<{ isOpenMobile?: boolean; onCloseMobile?: () => v
   const handleLogout = async () => {
     try {
       await fetch("/api/auth/logout", { method: "POST" });
-      window.location.href = "/login";
     } catch (e) {
       console.error(e);
+    } finally {
+      window.location.href = "/login";
     }
   };
 
