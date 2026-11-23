@@ -2,9 +2,17 @@ import { prisma } from "@/lib/prisma";
 import { EstadoDeuda, EstadoCuota, TipoMovimiento, DestinoAbono } from "@prisma/client";
 
 export interface DashboardSummary {
+  mesSeleccionado: number;
+  anioSeleccionado: number;
+  esMesActual: boolean;
   deudaTotalInicial: number;
   totalPagado: number;
-  saldoPendiente: number;
+  saldoPendiente: number; // Saldo al corte del mes seleccionado
+  deudaActualEnVivo: number; // Saldo actual real en tiempo real
+  saldoInicioMes: number; // Saldo con el que inició el mes seleccionado
+  totalAbonadoEnMes: number; // Lo que se abonó/pagó exactamente en este mes
+  saldoCierreMes: number; // Saldo con el que cerró el mes seleccionado
+  porcentajeAmortizadoMes: number; // % amortizado en el mes
   progresoPorcentaje: number;
   porcentajePendiente: number;
   cuotasMensualesActivas: number;
@@ -13,10 +21,24 @@ export interface DashboardSummary {
   valorCuotaMensualTotal: number;
   totalDeudas: number;
   deudasPagadas: number;
+  movimientosDelMes: {
+    id: string;
+    deudaId: string;
+    entidad: string;
+    tipo: string;
+    monto: number;
+    fecha: string;
+    saldoAnterior: number;
+    saldoPosterior: number;
+    observaciones: string | null;
+  }[];
   distribucionPorEntidad: {
     id: string;
     entidad: string;
     saldoPendiente: number;
+    saldoInicioMes: number;
+    abonadoEnMes: number;
+    saldoCierreMes: number;
     montoInicial: number;
     porcentajeSobreTotal: number;
     estado: string;
@@ -34,7 +56,22 @@ const ENTITY_COLORS: Record<string, string> = {
 
 const DEFAULT_COLORS = ["#3B82F6", "#10B981", "#EC4899", "#6366F1", "#14B8A6"];
 
-export async function getDashboardSummary(): Promise<DashboardSummary> {
+export async function getDashboardSummary(
+  mesParam?: number,
+  anioParam?: number
+): Promise<DashboardSummary> {
+  const now = new Date();
+  const currentMes = now.getMonth() + 1;
+  const currentAnio = now.getFullYear();
+
+  const mesSeleccionado = mesParam || currentMes;
+  const anioSeleccionado = anioParam || currentAnio;
+  const esMesActual =
+    mesSeleccionado === currentMes && anioSeleccionado === currentAnio;
+
+  const inicioMes = new Date(anioSeleccionado, mesSeleccionado - 1, 1, 0, 0, 0, 0);
+  const finMes = new Date(anioSeleccionado, mesSeleccionado, 0, 23, 59, 59, 999);
+
   const deudas = await prisma.deuda.findMany({
     orderBy: { orden: "asc" },
     include: {
@@ -43,38 +80,110 @@ export async function getDashboardSummary(): Promise<DashboardSummary> {
       },
       movimientos: {
         where: { estaRevertido: false },
+        orderBy: { fecha: "asc" },
       },
     },
   });
 
   let deudaTotalInicial = 0;
-  let saldoPendiente = 0;
+  let deudaActualEnVivo = 0;
+  let saldoTotalInicioMes = 0;
+  let totalAbonadoEnMes = 0;
+  let saldoTotalCierreMes = 0;
+
   let cuotasMensualesActivas = 0;
   let cuotasEnMoraTotales = 0;
   let totalEnMora = 0;
   let valorCuotaMensualTotal = 0;
   let deudasPagadas = 0;
 
-  for (const d of deudas) {
+  // Arreglo temporal enriquecido con trazabilidad
+  const deudasCalculadas = deudas.map((d) => {
     const montoIni = Number(d.montoInicial);
-    const saldoPend = Number(d.saldoPendiente);
+    const saldoActual = Number(d.saldoPendiente);
     const cuotaMensual = Number(d.valorCuotaMensual);
     const mora = Number(d.valorVencidoMora);
 
     deudaTotalInicial += montoIni;
-    saldoPendiente += saldoPend;
+    deudaActualEnVivo += saldoActual;
     totalEnMora += mora;
     cuotasEnMoraTotales += d.cuotasEnMora;
 
-    if (d.estado !== EstadoDeuda.PAGADA) {
+    if (d.estado !== EstadoDeuda.PAGADA && saldoActual > 0) {
       valorCuotaMensualTotal += cuotaMensual;
       cuotasMensualesActivas += d.cuotas.length;
     } else {
       deudasPagadas += 1;
     }
-  }
 
-  // Pagos netos confirmados en el sistema
+    // Movimientos del mes seleccionado para esta deuda
+    const movsEnMes = d.movimientos.filter((m) => {
+      const f = new Date(m.fecha);
+      return f >= inicioMes && f <= finMes;
+    });
+
+    const abonadoEnMes = movsEnMes.reduce((sum, m) => {
+      if (
+        m.tipo === TipoMovimiento.PAGO_CUOTA ||
+        m.tipo === TipoMovimiento.ABONO_EXTRAORDINARIO ||
+        m.tipo === TipoMovimiento.PAGO_TOTAL
+      ) {
+        return sum + Number(m.monto);
+      }
+      return sum;
+    }, 0);
+
+    // Movimientos posteriores al fin del mes seleccionado
+    const movsPosteriores = d.movimientos.filter(
+      (m) => new Date(m.fecha) > finMes
+    );
+
+    const pagosPosteriores = movsPosteriores.reduce((sum, m) => {
+      if (
+        m.tipo === TipoMovimiento.PAGO_CUOTA ||
+        m.tipo === TipoMovimiento.ABONO_EXTRAORDINARIO ||
+        m.tipo === TipoMovimiento.PAGO_TOTAL
+      ) {
+        return sum + Number(m.monto);
+      }
+      return sum;
+    }, 0);
+
+    let saldoCierreMes = saldoActual;
+    let saldoInicioMes = saldoActual;
+
+    if (esMesActual) {
+      saldoCierreMes = saldoActual;
+      saldoInicioMes = Math.min(montoIni, saldoActual + abonadoEnMes);
+    } else if (finMes < now) {
+      // Mes histórico del pasado
+      saldoCierreMes = Math.min(montoIni, saldoActual + pagosPosteriores);
+      saldoInicioMes = Math.min(montoIni, saldoCierreMes + abonadoEnMes);
+    } else {
+      // Mes futuro
+      saldoCierreMes = saldoActual;
+      saldoInicioMes = saldoActual;
+    }
+
+    saldoTotalInicioMes += saldoInicioMes;
+    totalAbonadoEnMes += abonadoEnMes;
+    saldoTotalCierreMes += saldoCierreMes;
+
+    return {
+      deuda: d,
+      montoIni,
+      saldoActual,
+      saldoInicioMes,
+      abonadoEnMes,
+      saldoCierreMes,
+      movimientosMes: movsEnMes,
+    };
+  });
+
+  // Saldo a mostrar como principal: si es mes actual, el saldo vivo; si es mes histórico, el saldo de cierre de ese mes
+  const saldoPendiente = esMesActual ? deudaActualEnVivo : saldoTotalCierreMes;
+
+  // Total pagado acumulado hasta la fecha de corte
   const totalPagado = Math.max(0, deudaTotalInicial - saldoPendiente);
 
   // Porcentajes
@@ -83,14 +192,41 @@ export async function getDashboardSummary(): Promise<DashboardSummary> {
   const porcentajePendiente =
     deudaTotalInicial > 0 ? (saldoPendiente / deudaTotalInicial) * 100 : 0;
 
-  const distribucionPorEntidad = deudas.map((d, index) => {
-    const saldo = Number(d.saldoPendiente);
+  const porcentajeAmortizadoMes =
+    saldoTotalInicioMes > 0
+      ? (totalAbonadoEnMes / saldoTotalInicioMes) * 100
+      : 0;
+
+  // Movimientos del mes de todas las deudas agrupados y ordenados por fecha
+  const movimientosDelMes = deudasCalculadas
+    .flatMap((item) =>
+      item.movimientosMes.map((m) => ({
+        id: m.id,
+        deudaId: item.deuda.id,
+        entidad: item.deuda.entidad,
+        tipo: m.tipo,
+        monto: Number(m.monto),
+        fecha: m.fecha.toISOString(),
+        saldoAnterior: Number(m.saldoAnterior),
+        saldoPosterior: Number(m.saldoPosterior),
+        observaciones: m.observaciones,
+      }))
+    )
+    .sort((a, b) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime());
+
+  // Distribución por entidad para el mes seleccionado
+  const distribucionPorEntidad = deudasCalculadas.map((item, index) => {
+    const d = item.deuda;
+    const saldo = esMesActual ? item.saldoActual : item.saldoCierreMes;
     const pct = saldoPendiente > 0 ? (saldo / saldoPendiente) * 100 : 0;
     return {
       id: d.id,
       entidad: d.entidad,
       saldoPendiente: saldo,
-      montoInicial: Number(d.montoInicial),
+      saldoInicioMes: item.saldoInicioMes,
+      abonadoEnMes: item.abonadoEnMes,
+      saldoCierreMes: item.saldoCierreMes,
+      montoInicial: item.montoIni,
       porcentajeSobreTotal: Number(pct.toFixed(2)),
       estado: d.estado,
       color: ENTITY_COLORS[d.entidad] || DEFAULT_COLORS[index % DEFAULT_COLORS.length],
@@ -98,9 +234,17 @@ export async function getDashboardSummary(): Promise<DashboardSummary> {
   });
 
   return {
+    mesSeleccionado,
+    anioSeleccionado,
+    esMesActual,
     deudaTotalInicial,
     totalPagado,
     saldoPendiente,
+    deudaActualEnVivo,
+    saldoInicioMes: saldoTotalInicioMes,
+    totalAbonadoEnMes,
+    saldoCierreMes: saldoTotalCierreMes,
+    porcentajeAmortizadoMes: Number(porcentajeAmortizadoMes.toFixed(2)),
     progresoPorcentaje: Number(progresoPorcentaje.toFixed(2)),
     porcentajePendiente: Number(porcentajePendiente.toFixed(2)),
     cuotasMensualesActivas,
@@ -109,6 +253,7 @@ export async function getDashboardSummary(): Promise<DashboardSummary> {
     valorCuotaMensualTotal,
     totalDeudas: deudas.length,
     deudasPagadas,
+    movimientosDelMes,
     distribucionPorEntidad,
   };
 }

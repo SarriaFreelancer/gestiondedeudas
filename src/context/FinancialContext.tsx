@@ -39,6 +39,12 @@ interface FinancialContextType {
   usuario: UsuarioPerfil | null;
   loading: boolean;
   error: string | null;
+  mesSeleccionado: number;
+  anioSeleccionado: number;
+  esMesActual: boolean;
+  setMesSeleccionado: (mes: number) => void;
+  setAnioSeleccionado: (anio: number) => void;
+  irAMesActual: () => void;
   refreshData: () => Promise<void>;
   refreshUsuario: () => Promise<void>;
   selectedDeudaForPayment: DeudaItem | null;
@@ -56,6 +62,15 @@ interface FinancialContextType {
 const FinancialContext = createContext<FinancialContextType | undefined>(undefined);
 
 export function FinancialProvider({ children }: { children: React.ReactNode }) {
+  const now = new Date();
+  const currentMes = now.getMonth() + 1;
+  const currentAnio = now.getFullYear();
+
+  const [mesSeleccionado, setMesSeleccionado] = useState<number>(currentMes);
+  const [anioSeleccionado, setAnioSeleccionado] = useState<number>(currentAnio);
+  const esMesActual =
+    mesSeleccionado === currentMes && anioSeleccionado === currentAnio;
+
   const [summary, setSummary] = useState<DashboardSummary | null>(null);
   const [deudas, setDeudas] = useState<DeudaItem[]>([]);
   const [usuario, setUsuario] = useState<UsuarioPerfil | null>(null);
@@ -67,6 +82,12 @@ export function FinancialProvider({ children }: { children: React.ReactNode }) {
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState<boolean>(false);
   const [isAbonoModalOpen, setIsAbonoModalOpen] = useState<boolean>(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState<boolean>(false);
+
+  const irAMesActual = useCallback(() => {
+    const d = new Date();
+    setMesSeleccionado(d.getMonth() + 1);
+    setAnioSeleccionado(d.getFullYear());
+  }, []);
 
   const refreshUsuario = useCallback(async () => {
     try {
@@ -83,7 +104,9 @@ export function FinancialProvider({ children }: { children: React.ReactNode }) {
   const refreshData = useCallback(async () => {
     try {
       const [sumRes, deudasRes] = await Promise.all([
-        fetch("/api/summary", { cache: "no-store" }),
+        fetch(`/api/summary?mes=${mesSeleccionado}&anio=${anioSeleccionado}`, {
+          cache: "no-store",
+        }),
         fetch("/api/deudas", { cache: "no-store" }),
       ]);
 
@@ -103,12 +126,15 @@ export function FinancialProvider({ children }: { children: React.ReactNode }) {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [mesSeleccionado, anioSeleccionado]);
 
   useEffect(() => {
     refreshData();
+  }, [refreshData]);
+
+  useEffect(() => {
     refreshUsuario();
-  }, [refreshData, refreshUsuario]);
+  }, [refreshUsuario]);
 
   return (
     <FinancialContext.Provider
@@ -118,6 +144,12 @@ export function FinancialProvider({ children }: { children: React.ReactNode }) {
         usuario,
         loading,
         error,
+        mesSeleccionado,
+        anioSeleccionado,
+        esMesActual,
+        setMesSeleccionado,
+        setAnioSeleccionado,
+        irAMesActual,
         refreshData,
         refreshUsuario,
         selectedDeudaForPayment,

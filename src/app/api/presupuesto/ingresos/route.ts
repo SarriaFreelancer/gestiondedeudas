@@ -22,7 +22,16 @@ export async function GET(req: Request) {
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { descripcion, monto, periodo, mes, anio, fuente } = body;
+    const {
+      descripcion,
+      monto,
+      periodo,
+      mes,
+      anio,
+      fuente,
+      sincronizarQuincena = true,
+      propagarFuturos = true,
+    } = body;
 
     if (!descripcion || !monto) {
       return NextResponse.json(
@@ -32,16 +41,86 @@ export async function POST(req: Request) {
     }
 
     const now = new Date();
+    const targetMes = mes ? parseInt(mes) : now.getMonth() + 1;
+    const targetAnio = anio ? parseInt(anio) : now.getFullYear();
+    const targetPeriodo = (periodo as PeriodoPresupuesto) || PeriodoPresupuesto.QUINCENA_1;
+    const nuevoMonto = Number(monto);
+
     const ingreso = await prisma.ingreso.create({
       data: {
         descripcion: descripcion.trim(),
-        monto: Number(monto),
-        periodo: (periodo as PeriodoPresupuesto) || PeriodoPresupuesto.QUINCENA_1,
-        mes: mes ? parseInt(mes) : now.getMonth() + 1,
-        anio: anio ? parseInt(anio) : now.getFullYear(),
+        monto: nuevoMonto,
+        periodo: targetPeriodo,
+        mes: targetMes,
+        anio: targetAnio,
         fuente: fuente?.trim() || "SALARIO",
       },
     });
+
+    // Si se agrega una quincena y sincronizarQuincena es true, asegurar la contraparte
+    if (
+      sincronizarQuincena &&
+      (targetPeriodo === PeriodoPresupuesto.QUINCENA_1 ||
+        targetPeriodo === PeriodoPresupuesto.QUINCENA_2)
+    ) {
+      const contrapartePeriodo =
+        targetPeriodo === PeriodoPresupuesto.QUINCENA_1
+          ? PeriodoPresupuesto.QUINCENA_2
+          : PeriodoPresupuesto.QUINCENA_1;
+
+      const contraparteDesc =
+        contrapartePeriodo === PeriodoPresupuesto.QUINCENA_1
+          ? "Salario 1ra Quincena"
+          : "Salario 2da Quincena";
+
+      const contraparte = await prisma.ingreso.findFirst({
+        where: {
+          mes: targetMes,
+          anio: targetAnio,
+          periodo: contrapartePeriodo,
+        },
+      });
+
+      if (contraparte) {
+        await prisma.ingreso.update({
+          where: { id: contraparte.id },
+          data: { monto: nuevoMonto },
+        });
+      } else {
+        await prisma.ingreso.create({
+          data: {
+            descripcion: contraparteDesc,
+            monto: nuevoMonto,
+            periodo: contrapartePeriodo,
+            mes: targetMes,
+            anio: targetAnio,
+            fuente: fuente?.trim() || "SALARIO",
+          },
+        });
+      }
+    }
+
+    // Propagar a meses futuros existentes
+    if (propagarFuturos) {
+      const mesesFuturos = await prisma.ingreso.findMany({
+        where: {
+          OR: [
+            { anio: targetAnio, mes: { gt: targetMes } },
+            { anio: { gt: targetAnio } },
+          ],
+          fuente: "SALARIO",
+        },
+      });
+
+      for (const fut of mesesFuturos) {
+        if (sincronizarQuincena || fut.periodo === targetPeriodo) {
+          await prisma.ingreso.update({
+            where: { id: fut.id },
+            data: { monto: nuevoMonto },
+          });
+        }
+      }
+    }
 
     return NextResponse.json({ success: true, ingreso });
   } catch (error: any) {
@@ -50,11 +129,19 @@ export async function POST(req: Request) {
   }
 }
 
-// Editar salario existente
+// Editar salario existente con sincronización de quincenas y persistencia futura
 export async function PUT(req: Request) {
   try {
     const body = await req.json();
-    const { id, descripcion, monto, periodo, fuente } = body;
+    const {
+      id,
+      descripcion,
+      monto,
+      periodo,
+      fuente,
+      sincronizarQuincena = true,
+      propagarFuturos = true,
+    } = body;
 
     if (!id || !monto) {
       return NextResponse.json(
@@ -63,15 +150,88 @@ export async function PUT(req: Request) {
       );
     }
 
+    const ingresoActual = await prisma.ingreso.findUnique({ where: { id } });
+    if (!ingresoActual) {
+      return NextResponse.json({ error: "Salario no encontrado" }, { status: 404 });
+    }
+
+    const nuevoMonto = Number(monto);
+    const nuevoPeriodo = periodo ? (periodo as PeriodoPresupuesto) : ingresoActual.periodo;
+
     const ingreso = await prisma.ingreso.update({
       where: { id },
       data: {
         descripcion: descripcion ? descripcion.trim() : undefined,
-        monto: Number(monto),
-        periodo: periodo ? (periodo as PeriodoPresupuesto) : undefined,
+        monto: nuevoMonto,
+        periodo: nuevoPeriodo,
         fuente: fuente ? fuente.trim() : undefined,
       },
     });
+
+    // Sincronización automática de quincenas en el mismo mes
+    if (
+      sincronizarQuincena &&
+      (nuevoPeriodo === PeriodoPresupuesto.QUINCENA_1 ||
+        nuevoPeriodo === PeriodoPresupuesto.QUINCENA_2)
+    ) {
+      const contrapartePeriodo =
+        nuevoPeriodo === PeriodoPresupuesto.QUINCENA_1
+          ? PeriodoPresupuesto.QUINCENA_2
+          : PeriodoPresupuesto.QUINCENA_1;
+
+      const contraparteDesc =
+        contrapartePeriodo === PeriodoPresupuesto.QUINCENA_1
+          ? "Salario 1ra Quincena"
+          : "Salario 2da Quincena";
+
+      const contraparte = await prisma.ingreso.findFirst({
+        where: {
+          mes: ingresoActual.mes,
+          anio: ingresoActual.anio,
+          periodo: contrapartePeriodo,
+        },
+      });
+
+      if (contraparte) {
+        await prisma.ingreso.update({
+          where: { id: contraparte.id },
+          data: { monto: nuevoMonto },
+        });
+      } else {
+        await prisma.ingreso.create({
+          data: {
+            descripcion: contraparteDesc,
+            monto: nuevoMonto,
+            periodo: contrapartePeriodo,
+            mes: ingresoActual.mes,
+            anio: ingresoActual.anio,
+            fuente: ingreso.fuente || "SALARIO",
+          },
+        });
+      }
+    }
+
+    // Propagar a meses futuros existentes
+    if (propagarFuturos) {
+      const mesesFuturos = await prisma.ingreso.findMany({
+        where: {
+          OR: [
+            { anio: ingresoActual.anio, mes: { gt: ingresoActual.mes } },
+            { anio: { gt: ingresoActual.anio } },
+          ],
+          fuente: "SALARIO",
+        },
+      });
+
+      for (const fut of mesesFuturos) {
+        if (sincronizarQuincena || fut.periodo === nuevoPeriodo) {
+          await prisma.ingreso.update({
+            where: { id: fut.id },
+            data: { monto: nuevoMonto },
+          });
+        }
+      }
+    }
 
     return NextResponse.json({ success: true, ingreso });
   } catch (error: any) {

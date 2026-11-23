@@ -13,6 +13,8 @@ export const AddIncomeModal: React.FC = () => {
   const [monto, setMonto] = useState<number>(2500000);
   const [periodo, setPeriodo] = useState<string>("QUINCENA_1");
   const [fuente, setFuente] = useState<string>("SALARIO");
+  const [sincronizarQuincena, setSincronizarQuincena] = useState<boolean>(true);
+  const [propagarFuturos, setPropagarFuturos] = useState<boolean>(true);
   const [submitting, setSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -34,6 +36,8 @@ export const AddIncomeModal: React.FC = () => {
           fuente,
           mes,
           anio,
+          sincronizarQuincena,
+          propagarFuturos,
         }),
       });
 
@@ -141,6 +145,45 @@ export const AddIncomeModal: React.FC = () => {
               </select>
             </div>
           </div>
+
+          {/* OPCIONES DE SINCRONIZACIÓN Y PERSISTENCIA */}
+          {(periodo === "QUINCENA_1" || periodo === "QUINCENA_2") && (
+            <div className="p-3 rounded-2xl bg-slate-900/90 border border-slate-800 space-y-2">
+              <label className="flex items-start gap-2.5 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={sincronizarQuincena}
+                  onChange={(e) => setSincronizarQuincena(e.target.checked)}
+                  className="mt-0.5 rounded border-slate-700 text-emerald-500 focus:ring-emerald-500"
+                />
+                <div className="text-[11px]">
+                  <span className="font-semibold text-white block">
+                    Sincronizar ambas quincenas automáticamente
+                  </span>
+                  <span className="text-slate-400">
+                    Crea o actualiza la otra quincena con este mismo valor
+                  </span>
+                </div>
+              </label>
+
+              <label className="flex items-start gap-2.5 cursor-pointer pt-1 border-t border-slate-800/60">
+                <input
+                  type="checkbox"
+                  checked={propagarFuturos}
+                  onChange={(e) => setPropagarFuturos(e.target.checked)}
+                  className="mt-0.5 rounded border-slate-700 text-emerald-500 focus:ring-emerald-500"
+                />
+                <div className="text-[11px]">
+                  <span className="font-semibold text-white block">
+                    Mantener fijo para los próximos meses
+                  </span>
+                  <span className="text-slate-400">
+                    Al pasar a diciembre u otros meses, este salario se conservará
+                  </span>
+                </div>
+              </label>
+            </div>
+          )}
 
           <div className="flex items-center gap-3 pt-3">
             <button

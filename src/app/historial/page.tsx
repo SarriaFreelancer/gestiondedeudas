@@ -30,6 +30,7 @@ export default function HistorialPage() {
   // Filtros
   const [filtroEntidad, setFiltroEntidad] = useState<string>("TODAS");
   const [filtroTipo, setFiltroTipo] = useState<string>("TODOS");
+  const [filtroMes, setFiltroMes] = useState<string>("TODOS");
   const [busqueda, setBusqueda] = useState<string>("");
 
   // Modal de reversión
@@ -70,6 +71,11 @@ export default function HistorialPage() {
     return movimientos.filter((m) => {
       if (filtroEntidad !== "TODAS" && m.deudaId !== filtroEntidad) return false;
       if (filtroTipo !== "TODOS" && m.tipo !== filtroTipo) return false;
+      if (filtroMes !== "TODOS") {
+        const fechaM = new Date(m.fecha);
+        const mesM = fechaM.getMonth() + 1;
+        if (mesM !== parseInt(filtroMes)) return false;
+      }
       if (busqueda.trim()) {
         const query = busqueda.toLowerCase();
         const entidad = m.deuda?.entidad?.toLowerCase() || "";
@@ -81,7 +87,22 @@ export default function HistorialPage() {
       }
       return true;
     });
-  }, [movimientos, filtroEntidad, filtroTipo, busqueda]);
+  }, [movimientos, filtroEntidad, filtroTipo, filtroMes, busqueda]);
+
+  // Cálculos de resumen de lo filtrado
+  const totalAbonadoFiltrado = useMemo(() => {
+    return movimientosFiltrados.reduce((sum, m) => {
+      if (
+        !m.estaRevertido &&
+        (m.tipo === "PAGO_CUOTA" ||
+          m.tipo === "ABONO_EXTRAORDINARIO" ||
+          m.tipo === "PAGO_TOTAL")
+      ) {
+        return sum + Number(m.monto);
+      }
+      return sum;
+    }, 0);
+  }, [movimientosFiltrados]);
 
   // Manejo de reversión auditable
   const handleConfirmReversion = async (e: React.FormEvent) => {
@@ -209,17 +230,40 @@ export default function HistorialPage() {
       </div>
 
       {/* BARRA DE FILTROS & BÚSQUEDA */}
-      <div className="p-4 rounded-2xl bg-slate-900/60 border border-slate-800 grid grid-cols-1 sm:grid-cols-3 gap-3">
+      <div className="p-4 rounded-2xl bg-slate-900/60 border border-slate-800 grid grid-cols-1 sm:grid-cols-4 gap-3">
         {/* Búsqueda */}
         <div className="relative">
           <Search className="w-4 h-4 absolute left-3.5 top-3 text-slate-500" />
           <input
             type="text"
-            placeholder="Buscar por acreedor, referencia, notas..."
+            placeholder="Buscar por acreedor, ref..."
             value={busqueda}
             onChange={(e) => setBusqueda(e.target.value)}
             className="w-full pl-9 pr-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs focus:outline-none focus:border-blue-500"
           />
+        </div>
+
+        {/* Filtro Mes */}
+        <div>
+          <select
+            value={filtroMes}
+            onChange={(e) => setFiltroMes(e.target.value)}
+            className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs focus:outline-none focus:border-blue-500"
+          >
+            <option value="TODOS">Todos los meses (Histórico total)</option>
+            <option value="1">Enero</option>
+            <option value="2">Febrero</option>
+            <option value="3">Marzo</option>
+            <option value="4">Abril</option>
+            <option value="5">Mayo</option>
+            <option value="6">Junio</option>
+            <option value="7">Julio</option>
+            <option value="8">Agosto</option>
+            <option value="9">Septiembre</option>
+            <option value="10">Octubre</option>
+            <option value="11">Noviembre</option>
+            <option value="12">Diciembre</option>
+          </select>
         </div>
 
         {/* Filtro Acreedor */}
@@ -245,12 +289,28 @@ export default function HistorialPage() {
             onChange={(e) => setFiltroTipo(e.target.value)}
             className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs focus:outline-none focus:border-blue-500"
           >
-            <option value="TODOS">Todos los tipos de movimiento</option>
+            <option value="TODOS">Todos los tipos</option>
             <option value="PAGO_CUOTA">Pagos de Cuota</option>
             <option value="ABONO_EXTRAORDINARIO">Abonos Extraordinarios</option>
             <option value="PAGO_TOTAL">Cancelación Total</option>
             <option value="REVERSION_PAGO">Reversiones Auditables</option>
           </select>
+        </div>
+      </div>
+
+      {/* RESUMEN DEL PERIODO FILTRADO */}
+      <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 rounded-2xl bg-slate-900/40 border border-slate-800 text-xs">
+        <div className="flex items-center gap-2">
+          <span className="text-slate-400">Total movimientos visibles:</span>
+          <span className="font-bold text-white px-2 py-0.5 rounded bg-slate-800">
+            {movimientosFiltrados.length}
+          </span>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="text-slate-400">Total pagado/abonado en el filtro:</span>
+          <span className="font-extrabold text-emerald-400 font-mono text-sm">
+            {formatCOP(totalAbonadoFiltrado)}
+          </span>
         </div>
       </div>
 

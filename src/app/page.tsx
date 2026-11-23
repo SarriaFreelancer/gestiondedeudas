@@ -7,6 +7,7 @@ import { KpiCards } from "@/components/dashboard/KpiCards";
 import { CentralDonutChart } from "@/components/dashboard/CentralDonutChart";
 import { ProgressBar } from "@/components/dashboard/ProgressBar";
 import { CreditorDistributionChart } from "@/components/dashboard/CreditorDistributionChart";
+import { DebtMonthSelector } from "@/components/dashboard/DebtMonthSelector";
 import { BudgetDashboardView } from "@/components/budget/BudgetDashboardView";
 import { Loader2, Coins, Landmark } from "lucide-react";
 
@@ -69,6 +70,9 @@ export default function DashboardPage() {
       {/* VISTA 1: CONTROL DE DEUDAS (INTERFAZ ORIGINAL) */}
       {activeView === "DEUDAS" ? (
         <div className="space-y-4 sm:space-y-5 animate-in fade-in duration-200">
+          {/* SELECTOR TEMPORAL Y TRAZABILIDAD MENSUAL DE DEUDAS */}
+          <DebtMonthSelector />
+
           {/* LAS 4 TARJETAS DE KPIS EN GRID 2X2 */}
           <KpiCards
             deudaTotalInicial={deudaTotalInicial}

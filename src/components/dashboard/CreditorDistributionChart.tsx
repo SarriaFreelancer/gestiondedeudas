@@ -10,6 +10,9 @@ interface CreditorDistributionProps {
     id: string;
     entidad: string;
     saldoPendiente: number;
+    saldoInicioMes?: number;
+    abonadoEnMes?: number;
+    saldoCierreMes?: number;
     montoInicial: number;
     porcentajeSobreTotal: number;
     estado: string;
@@ -117,9 +120,16 @@ export const CreditorDistributionChart: React.FC<CreditorDistributionProps> = ({
                   className="w-2.5 h-2.5 rounded-full flex-shrink-0 shadow-sm"
                   style={{ backgroundColor: item.colorAlineado }}
                 />
-                <span className="font-semibold text-white tracking-tight">
-                  {item.nombreVisual}
-                </span>
+                <div>
+                  <span className="font-semibold text-white tracking-tight block">
+                    {item.nombreVisual}
+                  </span>
+                  {item.abonadoEnMes !== undefined && item.abonadoEnMes > 0 && (
+                    <span className="text-[10px] text-emerald-400 font-bold">
+                      Abonado: -{formatCOP(item.abonadoEnMes)}
+                    </span>
+                  )}
+                </div>
               </div>
 
               {/* Porcentaje */}
