@@ -27,8 +27,8 @@ export default {
         },
       },
       fontFamily: {
-        sans: ["var(--font-geist-sans)", "system-ui", "-apple-system", "sans-serif"],
-        mono: ["var(--font-geist-mono)", "monospace"],
+        sans: ["var(--font-sans)", "Plus Jakarta Sans", "Inter", "system-ui", "-apple-system", "sans-serif"],
+        mono: ["var(--font-mono)", "JetBrains Mono", "monospace"],
       },
       boxShadow: {
         card: "0 8px 30px rgba(0, 0, 0, 0.45)",
