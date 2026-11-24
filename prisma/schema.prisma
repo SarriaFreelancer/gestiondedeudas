@@ -44,6 +44,7 @@ enum PeriodoPresupuesto {
 enum TipoGasto {
   FIJO
   VARIABLE
+  OCASIONAL
 }
 
 enum CategoriaGasto {

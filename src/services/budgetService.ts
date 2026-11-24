@@ -208,60 +208,28 @@ export async function ensureMonthlyBudgetInitialized(mes: number, anio: number) 
   // 1. Revisar Ingresos
   const countIngresos = await prisma.ingreso.count({ where: { mes, anio } });
   if (countIngresos === 0) {
-    // Buscar los últimos ingresos configurados en meses anteriores
-    const ultimosIngresos = await prisma.ingreso.findMany({
-      where: {
-        OR: [
-          { anio: { lt: anio } },
-          { anio: anio, mes: { lt: mes } },
-        ],
-      },
-      orderBy: [{ anio: "desc" }, { mes: "desc" }, { createdAt: "desc" }],
-      take: 4,
+    // Si no se han registrado ingresos para este mes, inicializar las quincenas en 0 COP
+    // permitiendo que el usuario tenga su saldo en cero hasta que decida registrar su sueldo recibido.
+    await prisma.ingreso.createMany({
+      data: [
+        {
+          descripcion: "Salario 1ra Quincena",
+          monto: 0,
+          periodo: PeriodoPresupuesto.QUINCENA_1,
+          mes,
+          anio,
+          fuente: "SALARIO",
+        },
+        {
+          descripcion: "Salario 2da Quincena",
+          monto: 0,
+          periodo: PeriodoPresupuesto.QUINCENA_2,
+          mes,
+          anio,
+          fuente: "SALARIO",
+        },
+      ],
     });
-
-    if (ultimosIngresos.length > 0) {
-      const ultMes = ultimosIngresos[0].mes;
-      const ultAnio = ultimosIngresos[0].anio;
-      const ingresosFuente = await prisma.ingreso.findMany({
-        where: { mes: ultMes, anio: ultAnio },
-      });
-
-      if (ingresosFuente.length > 0) {
-        await prisma.ingreso.createMany({
-          data: ingresosFuente.map((ing) => ({
-            descripcion: ing.descripcion,
-            monto: ing.monto,
-            periodo: ing.periodo,
-            mes,
-            anio,
-            fuente: ing.fuente || "SALARIO",
-          })),
-        });
-      }
-    } else {
-      // Si no hay ninguno previo en la base de datos, sembrar salario base
-      await prisma.ingreso.createMany({
-        data: [
-          {
-            descripcion: "Salario 1ra Quincena",
-            monto: 2500000,
-            periodo: PeriodoPresupuesto.QUINCENA_1,
-            mes,
-            anio,
-            fuente: "SALARIO",
-          },
-          {
-            descripcion: "Salario 2da Quincena",
-            monto: 2500000,
-            periodo: PeriodoPresupuesto.QUINCENA_2,
-            mes,
-            anio,
-            fuente: "SALARIO",
-          },
-        ],
-      });
-    }
   }
 }
 

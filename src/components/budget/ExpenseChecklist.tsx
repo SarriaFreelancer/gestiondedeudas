@@ -127,12 +127,14 @@ export const ExpenseChecklist: React.FC = () => {
 
                     <span
                       className={`text-[9px] font-bold px-2 py-0.5 rounded-full uppercase border ${
-                        isFijo
+                        gasto.tipo === "FIJO"
                           ? "bg-blue-500/10 text-blue-300 border-blue-500/20"
+                          : gasto.tipo === "OCASIONAL"
+                          ? "bg-purple-500/10 text-purple-300 border-purple-500/20"
                           : "bg-amber-500/10 text-amber-300 border-amber-500/20"
                       }`}
                     >
-                      {gasto.tipo}
+                      {gasto.tipo === "OCASIONAL" ? "Ocasional (1 mes)" : gasto.tipo}
                     </span>
 
                     <span className="text-[9px] font-medium px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700">

@@ -33,7 +33,7 @@ export async function POST(req: Request) {
       propagarFuturos = true,
     } = body;
 
-    if (!descripcion || !monto) {
+    if (!descripcion || monto === undefined || monto === null) {
       return NextResponse.json(
         { error: "Descripción y monto de salario son requeridos" },
         { status: 400 }
@@ -146,7 +146,7 @@ export async function PUT(req: Request) {
       propagarFuturos = true,
     } = body;
 
-    if (!id || !monto) {
+    if (!id || monto === undefined || monto === null) {
       return NextResponse.json(
         { error: "ID y monto de salario son requeridos para actualizar" },
         { status: 400 }

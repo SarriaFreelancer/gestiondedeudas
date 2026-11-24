@@ -137,13 +137,22 @@ export const AddIncomeModal: React.FC = () => {
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-300 mb-1">
-              Monto Recibido (COP) *
-            </label>
+            <div className="flex items-center justify-between mb-1">
+              <label className="block text-xs font-semibold text-slate-300">
+                Monto Recibido (COP) *
+              </label>
+              <button
+                type="button"
+                onClick={() => setMonto(0)}
+                className="text-[10px] text-amber-400 hover:text-amber-300 font-semibold underline"
+              >
+                Poner en $0 (Aún no recibido)
+              </button>
+            </div>
             <input
               type="number"
               required
-              min={1}
+              min={0}
               value={monto}
               onChange={(e) => setMonto(Number(e.target.value))}
               className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white font-bold text-base focus:outline-none focus:border-blue-500"

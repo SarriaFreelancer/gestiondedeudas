@@ -115,8 +115,9 @@ export const AddExpenseModal: React.FC = () => {
                 onChange={(e) => setTipo(e.target.value)}
                 className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs focus:outline-none focus:border-blue-500"
               >
-                <option value="FIJO">Fijo (Siempre el mismo valor)</option>
+                <option value="FIJO">Fijo (Mensual recurrente)</option>
                 <option value="VARIABLE">Variable (Cambia cada mes)</option>
+                <option value="OCASIONAL">Ocasional (Solo este mes, no recurrente)</option>
               </select>
             </div>
 
